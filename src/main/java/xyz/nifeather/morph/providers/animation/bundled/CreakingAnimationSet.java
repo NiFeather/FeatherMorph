@@ -21,6 +21,7 @@ public class CreakingAnimationSet extends AnimationSet
                             .legacyName(AnimationNames.MAKE_ACTIVE)
                             .onPlay(state ->
                             {
+                                // It's okay for creaking disguise to write persistent glowing state... at least I thought
                                 state.disguisePropertyHandler().set(properties().EYES_GLOWING, true);
 
                                 var player = state.getPlayer();
@@ -34,6 +35,7 @@ public class CreakingAnimationSet extends AnimationSet
                             .legacyName(AnimationNames.MAKE_INACTIVE)
                             .onPlay(state ->
                             {
+                                // Same as above.
                                 state.disguisePropertyHandler().set(properties().EYES_GLOWING, false);
 
                                 var player = state.getPlayer();

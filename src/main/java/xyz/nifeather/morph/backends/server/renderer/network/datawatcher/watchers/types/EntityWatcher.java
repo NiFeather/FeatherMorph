@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
@@ -34,8 +33,6 @@ import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
 import java.util.*;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.TimeoutException;
 
 public class EntityWatcher extends SingleWatcher
 {
@@ -90,7 +87,7 @@ public class EntityWatcher extends SingleWatcher
     }
 
     @Override
-    protected <X> void onPropertyDiscard(SingleProperty<X> property, X oldValue)
+    protected <X> void onPropertyDiscard(SingleProperty<X> property)
     {
         switch (property.id())
         {
@@ -119,7 +116,7 @@ public class EntityWatcher extends SingleWatcher
             }
         }
 
-        super.onPropertyDiscard(property, oldValue);
+        super.onPropertyDiscard(property);
     }
 
     protected List<PacketWrapper<?>> createRotationPackets()

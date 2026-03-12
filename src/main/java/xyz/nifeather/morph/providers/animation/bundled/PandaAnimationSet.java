@@ -17,14 +17,14 @@ public class PandaAnimationSet extends AnimationSet
             .addStage(b ->
                     b.duration(5)
                             .legacyName(AnimationNames.SIT)
-                            .onPlay(state -> state.disguisePropertyHandler().set(properties().SITTING, true)))
+                            .onPlay(state -> state.disguisePropertyHandler().setTemp(properties().SITTING, true)))
             .build();
 
     public final PlayableAction STAND = PlayableAction.builder()
             .addStage(b ->
                     b.duration(5)
                             .legacyName(AnimationNames.STANDUP)
-                            .onPlay(state -> state.disguisePropertyHandler().set(properties().SITTING, false)))
+                            .onPlay(state -> state.disguisePropertyHandler().setTemp(properties().SITTING, false)))
             .addStage(b ->
                     b.duration(0)
                             .legacyName(AnimationNames.RESET))

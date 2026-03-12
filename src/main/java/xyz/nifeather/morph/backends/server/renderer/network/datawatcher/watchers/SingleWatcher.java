@@ -119,15 +119,15 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Disguise Property
 
-    public final <X> void discardProperty(SingleProperty<X> property, X oldValue)
+    public final <X> void discardProperty(SingleProperty<X> property)
     {
         if (property.restoreDefaultsBeforeDiscard())
             writeProperty(property, property.defaultVal());
 
-        onPropertyDiscard(property, oldValue);
+        onPropertyDiscard(property);
     }
 
-    protected <X> void onPropertyDiscard(SingleProperty<X> property, X oldValue)
+    protected <X> void onPropertyDiscard(SingleProperty<X> property)
     {
     }
 

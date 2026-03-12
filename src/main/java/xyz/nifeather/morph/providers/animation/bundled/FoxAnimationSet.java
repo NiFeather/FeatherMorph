@@ -17,21 +17,21 @@ public class FoxAnimationSet extends AnimationSet
             .addStage(b ->
                     b.duration(5)
                             .legacyName(AnimationNames.SLEEP)
-                            .onPlay(state -> state.disguisePropertyHandler().set(properties().STATUS, FoxPropertyCollection.FoxStatus.SLEEPING)))
+                            .onPlay(state -> state.disguisePropertyHandler().setTemp(properties().STATUS, FoxPropertyCollection.FoxStatus.SLEEPING)))
             .build();
     
     public final PlayableAction SIT = PlayableAction.builder()
             .addStage(b ->
                     b.duration(5)
                             .legacyName(AnimationNames.SIT)
-                            .onPlay(state -> state.disguisePropertyHandler().set(properties().STATUS, FoxPropertyCollection.FoxStatus.SITTING)))
+                            .onPlay(state -> state.disguisePropertyHandler().setTemp(properties().STATUS, FoxPropertyCollection.FoxStatus.SITTING)))
             .build();
     
     public final PlayableAction STAND = PlayableAction.builder()
             .addStage(b ->
                     b.duration(5)
                             .legacyName(AnimationNames.STANDUP)
-                            .onPlay(state -> state.disguisePropertyHandler().set(properties().STATUS, FoxPropertyCollection.FoxStatus.STANDING)))
+                            .onPlay(state -> state.disguisePropertyHandler().discardTemporaryProperty(properties().STATUS)))
             .addStage(b ->
                     b.duration(0)
                             .legacyName(AnimationNames.RESET))

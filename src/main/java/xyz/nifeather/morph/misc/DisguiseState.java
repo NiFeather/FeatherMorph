@@ -113,16 +113,31 @@ public class DisguiseState extends MorphPluginObject
 
         disguisePropertyHandler().hookOnPropertyWrite(this::onPropertyWrite);
         disguisePropertyHandler().hookOnPropertyDiscard(this::onPropertyDiscard);
+
+        disguisePropertyHandler().hookOnTemporaryPropertyWrite(this::onTempPropertyWrite);
+        disguisePropertyHandler().hookOnTemporaryPropertyDiscard(this::onTemporaryDiscard);
     }
 
-    private void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    private void onTemporaryDiscard(SingleProperty<Object> property)
     {
-        disguiseWrapper.onDisguiseAttributeChange(id, attribute);
+        var persistValue = disguisePropertyHandler().getOr(property, null);
+        if (persistValue == null)
+        {
+            disguiseWrapper.discardProperty(property);
+            return;
+        }
+
+        disguiseWrapper.writeProperty(property, persistValue);
     }
 
-    private void onPropertyDiscard(SingleProperty<Object> property, Object o)
+    private <V> void onTempPropertyWrite(SingleProperty<V> proper, V o)
     {
-        disguiseWrapper.discardProperty(property, o);
+        this.onPropertyWrite(proper, o);
+    }
+
+    private void onPropertyDiscard(SingleProperty<Object> property)
+    {
+        disguiseWrapper.discardProperty(property);
     }
 
     private void onPropertyWrite(SingleProperty<?> singleProperty, Object o)
@@ -143,6 +158,11 @@ public class DisguiseState extends MorphPluginObject
         }
 
         disguiseWrapper.writeProperty((SingleProperty<Object>) singleProperty, o);
+    }
+
+    private void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    {
+        disguiseWrapper.onDisguiseAttributeChange(id, attribute);
     }
 
     @Resolved(shouldSolveImmediately = true)

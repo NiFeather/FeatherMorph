@@ -20,7 +20,7 @@ public class PiglinAnimationSet extends AnimationSet
                             .legacyName(AnimationNames.DANCE_START)
                             .onPlay(state ->
                             {
-                                state.disguisePropertyHandler().set(properties().DANCING, true);
+                                state.disguisePropertyHandler().setTemp(properties().DANCING, true);
 
                                 var player = state.getPlayer();
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PIGLIN_CELEBRATE, 1, 1);
@@ -31,7 +31,7 @@ public class PiglinAnimationSet extends AnimationSet
             .addStage(b ->
                     b.duration(0)
                             .legacyName(AnimationNames.STOP)
-                            .onPlay(state -> state.disguisePropertyHandler().set(properties().DANCING, false)))
+                            .onPlay(state -> state.disguisePropertyHandler().setTemp(properties().DANCING, false)))
             .addStage(b ->
                     b.duration(0)
                             .legacyName(AnimationNames.RESET))

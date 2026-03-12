@@ -53,12 +53,28 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
 
     @ApiStatus.Experimental
     public final SingleProperty<Vector3i> BED_POS = SingleProperty.builder(PropertyNames.LIVING_ENTITY_BED_POS, new Vector3i(0))
-            .withInputHandle(InputHandles::empty)
+            .withInputHandle(InputHandles::readVector3iRelaxed)
             .withOutputHandle(OutputHandles::writeVector3i)
             .restoreDefaultsBeforeDiscard(false)
             .hideFromUserInput(true)
+            .withValidator(this::validateBedPosPermission)
             .build();
-    
+
+    private void validateBedPosPermission(Vector3i bedPos, Entity entity, EnumSet<ValidationSkipFlag> skipFlags)
+            throws PropertyValidationException
+    {
+        if (skipFlags.contains(ValidationSkipFlag.SKIP_PERMISSIONS))
+            return;
+
+        if (!entity.hasPermission(CommonPermissions.BED_POS))
+        {
+            throw PropertyValidationException.forProperty(PropertyNames.LIVING_ENTITY_BED_POS)
+                    .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                    .withMessage("Player don't have permission to set bed position.")
+                    .create();
+        }
+    }
+
     @ApiStatus.Experimental
     public final SingleProperty<Boolean> INVISIBLE = SingleProperty.builder(PropertyNames.LIVING_ENTITY_INVISIBLE, false)
             .withInputHandle(InputHandles::readBooleanRelaxed)

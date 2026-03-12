@@ -20,7 +20,12 @@ public class CatAnimationSet extends AnimationSet
             .addStage(b ->
                     b.duration(0)
                             .legacyName(AnimationNames.LAY_START)
-                            .onPlay(state -> state.disguisePropertyHandler().set(properties().LYING, true)))
+                            .onPlay(state ->
+                            {
+                                var properties = properties();
+                                state.disguisePropertyHandler().discardTemporaryProperty(properties.SITTING);
+                                state.disguisePropertyHandler().setTemp(properties.LYING, true);
+                            }))
             .build();
 
     public final PlayableAction STANDUP = PlayableAction.builder()
@@ -31,8 +36,8 @@ public class CatAnimationSet extends AnimationSet
                         .onPlay(state ->
                         {
                             var properties = properties();
-                            state.disguisePropertyHandler().set(properties.LYING, false);
-                            state.disguisePropertyHandler().set(properties.SITTING, false);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties.LYING);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties.SITTING);
                         });
             })
             .addStage(b ->
@@ -47,7 +52,12 @@ public class CatAnimationSet extends AnimationSet
             .addStage(b ->
                     b.duration(0)
                             .legacyName(AnimationNames.SIT)
-                            .onPlay(state -> state.disguisePropertyHandler().set(properties().SITTING, true)))
+                            .onPlay(state ->
+                            {
+                                var properties = properties();
+                                state.disguisePropertyHandler().discardTemporaryProperty(properties.LYING);
+                                state.disguisePropertyHandler().setTemp(properties().SITTING, true);
+                            }))
             .build();
 
     public CatAnimationSet()

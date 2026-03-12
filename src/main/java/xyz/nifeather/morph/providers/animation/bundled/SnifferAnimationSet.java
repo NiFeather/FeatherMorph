@@ -31,13 +31,13 @@ public class SnifferAnimationSet extends AnimationSet
                         .onPlay(state ->
                         {
                             var player = state.getPlayer();
-                            state.disguisePropertyHandler().set(properties.SNIFFER_STATE, Sniffer.State.SNIFFING);
+                            state.disguisePropertyHandler().setTemp(properties.SNIFFER_STATE, Sniffer.State.SNIFFING);
 
                             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SNIFFER_SNIFFING, SoundCategory.NEUTRAL, 1, 1);
                         })
                         .onFinish(state ->
                         {
-                            state.disguisePropertyHandler().discardProperty(properties.SNIFFER_STATE);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties.SNIFFER_STATE);
                         });
             })
             .addStage(b ->

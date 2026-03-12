@@ -26,14 +26,14 @@ public class ShulkerAnimationSet extends AnimationSet
                         .legacyName(AnimationNames.PEEK_START)
                         .onPlay(state ->
                         {
-                            state.disguisePropertyHandler().set(properties.SHELL_HEIGHT, (byte)30);
+                            state.disguisePropertyHandler().setTemp(properties.SHELL_HEIGHT, (byte)30);
 
                             var player = state.getPlayer();
                             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SHULKER_OPEN, SoundCategory.HOSTILE, 1, 1);
                         })
                         .onFinish(state ->
                         {
-                            state.disguisePropertyHandler().set(properties.SHELL_HEIGHT, (byte)0);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties.SHELL_HEIGHT);
 
                             var player = state.getPlayer();
                             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SHULKER_CLOSE, SoundCategory.HOSTILE, 1, 1);
@@ -56,14 +56,14 @@ public class ShulkerAnimationSet extends AnimationSet
                         .legacyName(AnimationNames.OPEN_START)
                         .onPlay(state ->
                         {
-                            state.disguisePropertyHandler().set(properties().SHELL_HEIGHT, (byte)100);
+                            state.disguisePropertyHandler().setTemp(properties().SHELL_HEIGHT, (byte)100);
 
                             var player = state.getPlayer();
                             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SHULKER_OPEN, SoundCategory.HOSTILE, 1, 1);
                         })
                         .onFinish(state ->
                         {
-                            state.disguisePropertyHandler().set(properties.SHELL_HEIGHT, (byte)0);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties.SHELL_HEIGHT);
 
                             var player = state.getPlayer();
                             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SHULKER_CLOSE, SoundCategory.HOSTILE, 1, 1);

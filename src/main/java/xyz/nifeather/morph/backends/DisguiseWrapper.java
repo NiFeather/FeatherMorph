@@ -168,9 +168,8 @@ public abstract class DisguiseWrapper<TInstance>
      * Depending on {@link SingleProperty#restoreDefaultsBeforeDiscard()}, server-side presentation implementations may need reset the visual effect of the given property.
      *
      * @param property {@link SingleProperty} to discard
-     * @param oldValue The previously value
      */
-    public abstract <X> void discardProperty(SingleProperty<X> property, X oldValue);
+    public abstract <X> void discardProperty(SingleProperty<X> property);
 
     /**
      * @return 与此Property对应的值，如果没有设定则返回默认值

@@ -22,11 +22,11 @@ public class PlayerAnimationSet extends AnimationSet
                     .onPlay(state ->
                     {
                         var properties = properties();
-                        state.disguisePropertyHandler().set(properties.STATIC_POSE, Pose.SLEEPING);
+                        state.disguisePropertyHandler().setTemp(properties.STATIC_POSE, Pose.SLEEPING);
 
                         var playerPos = state.getPlayer().getLocation();
                         var vec3i = new Vector3i(playerPos.blockX(), playerPos.blockY(), playerPos.blockZ());
-                        state.disguisePropertyHandler().set(properties.BED_POS, vec3i);
+                        state.disguisePropertyHandler().setTemp(properties.BED_POS, vec3i);
                     }))
             .build();
 
@@ -37,7 +37,7 @@ public class PlayerAnimationSet extends AnimationSet
                         var properties = properties();
                         resetPoseAndBed(state, properties);
 
-                        state.disguisePropertyHandler().set(properties.STATIC_POSE, Pose.SWIMMING);
+                        state.disguisePropertyHandler().setTemp(properties.STATIC_POSE, Pose.SWIMMING);
                     }))
             .build();
 
@@ -56,8 +56,8 @@ public class PlayerAnimationSet extends AnimationSet
     private void resetPoseAndBed(DisguiseState state, PlayerPropertyCollection properties)
     {
         var propertyHandler = state.disguisePropertyHandler();
-        propertyHandler.discardProperty(properties.BED_POS);
-        propertyHandler.discardProperty(properties.STATIC_POSE);
+        propertyHandler.discardTemporaryProperty(properties.BED_POS);
+        propertyHandler.discardTemporaryProperty(properties.STATIC_POSE);
     }
 
     public PlayerAnimationSet()

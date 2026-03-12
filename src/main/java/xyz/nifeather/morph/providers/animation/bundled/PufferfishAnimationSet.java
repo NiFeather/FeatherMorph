@@ -27,7 +27,7 @@ public class PufferfishAnimationSet extends AnimationSet
                 if (existing != PufferfishPropertyCollection.PufferfishState.LARGE)
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PUFFER_FISH_BLOW_UP, SoundCategory.HOSTILE, 1, 1);
 
-                propertyHandler.set(properties.PUFF_STATE, PufferfishPropertyCollection.PufferfishState.LARGE);
+                propertyHandler.setTemp(properties.PUFF_STATE, PufferfishPropertyCollection.PufferfishState.LARGE);
             }))
             .build();
 
@@ -43,7 +43,7 @@ public class PufferfishAnimationSet extends AnimationSet
                 if (existing != PufferfishPropertyCollection.PufferfishState.SMALL)
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PUFFER_FISH_BLOW_OUT, SoundCategory.HOSTILE, 1, 1);
 
-                propertyHandler.set(properties.PUFF_STATE, PufferfishPropertyCollection.PufferfishState.SMALL);
+                propertyHandler.setTemp(properties.PUFF_STATE, PufferfishPropertyCollection.PufferfishState.SMALL);
             }))
             .addStage(b -> b.duration(0).legacyName(AnimationNames.RESET))
             .build();

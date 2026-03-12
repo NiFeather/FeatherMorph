@@ -18,7 +18,6 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
-import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
@@ -116,12 +115,12 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
-    public <X> void discardProperty(SingleProperty<X> property, X oldValue)
+    public <X> void discardProperty(SingleProperty<X> property)
     {
         disguiseProperties.remove(property);
 
         if (bindingWatcher == null) return;
-        bindingWatcher.discardProperty(property, oldValue);
+        bindingWatcher.discardProperty(property);
     }
 
     @Override

@@ -132,6 +132,11 @@ public class OutputHandles
         return eEnum.name().toLowerCase();
     }
 
+    public static <E extends Enum<E>> String writeEnumOrdinal(String propertyName, E eEnum)
+    {
+        return "" + eEnum.ordinal();
+    }
+
     public static String writeAdventureComponentJSON(String propertyName, Component component)
     {
         return COMPONENT_SERIALIZER.serialize(component);

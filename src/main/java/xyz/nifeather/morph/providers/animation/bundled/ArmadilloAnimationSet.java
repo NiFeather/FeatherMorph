@@ -23,7 +23,7 @@ public class ArmadilloAnimationSet extends AnimationSet
                             .legacyName(AnimationNames.PANIC_ROLLING)
                             .onPlay(state ->
                             {
-                                state.disguisePropertyHandler().set(properties().STATE, Armadillo.State.ROLLING);
+                                state.disguisePropertyHandler().setTemp(properties().STATE, Armadillo.State.ROLLING);
 
                                 var player = state.getPlayer();
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_ROLL, 1, 1);
@@ -33,7 +33,7 @@ public class ArmadilloAnimationSet extends AnimationSet
                             .legacyName(AnimationNames.PANIC_SCARED)
                             .onPlay(state ->
                             {
-                                state.disguisePropertyHandler().set(properties().STATE, Armadillo.State.SCARED);
+                                state.disguisePropertyHandler().setTemp(properties().STATE, Armadillo.State.SCARED);
 
                                 var player = state.getPlayer();
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_LAND, 1, 1);
@@ -43,23 +43,24 @@ public class ArmadilloAnimationSet extends AnimationSet
                             .legacyName(AnimationNames.PANIC_UNROLLING)
                             .onPlay(state ->
                             {
-                                state.disguisePropertyHandler().set(properties().STATE, Armadillo.State.UNROLLING);
+                                state.disguisePropertyHandler().setTemp(properties().STATE, Armadillo.State.UNROLLING);
 
                                 var player = state.getPlayer();
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_UNROLL_START, 1, 1);
                             }))
             .addStage(b ->
-                    b.duration(0)
+                    b.duration(5)
                             .legacyName(AnimationNames.PANIC_IDLE)
                             .onPlay(state ->
                             {
-                                state.disguisePropertyHandler().set(properties().STATE, Armadillo.State.IDLE);
+                                state.disguisePropertyHandler().setTemp(properties().STATE, Armadillo.State.IDLE);
 
                                 var player = state.getPlayer();
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARMADILLO_UNROLL_FINISH, 1, 1);
-                            }))
+                            })
+                            .onFinish(state -> state.disguisePropertyHandler().discardTemporaryProperty(properties().STATE)))
             .addStage(b ->
-                    b.duration(0)
+                    b.duration(5)
                             .legacyName(AnimationNames.RESET))
             .build();
 

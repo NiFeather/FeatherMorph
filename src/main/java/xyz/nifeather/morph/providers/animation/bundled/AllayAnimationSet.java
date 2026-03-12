@@ -14,7 +14,7 @@ public class AllayAnimationSet extends AnimationSet
                 var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(AllayPropertyCollection.class);
 
                 b.legacyName(AnimationNames.DANCE_START)
-                        .onPlay(s -> s.disguisePropertyHandler().set(properties.DANCING, true));
+                        .onPlay(s -> s.disguisePropertyHandler().setTemp(properties.DANCING, true));
             })
             .build();
 
@@ -24,7 +24,7 @@ public class AllayAnimationSet extends AnimationSet
                 var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(AllayPropertyCollection.class);
 
                 b.legacyName(AnimationNames.STOP)
-                        .onPlay(s -> s.disguisePropertyHandler().set(properties.DANCING, false));
+                        .onPlay(s -> s.disguisePropertyHandler().discardTemporaryProperty(properties.DANCING));
             })
             .addStage(b ->
                     b.duration(0).legacyName(AnimationNames.RESET))

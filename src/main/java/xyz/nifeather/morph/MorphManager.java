@@ -47,14 +47,16 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
+import xyz.nifeather.morph.network.commands.S2C.S2CDiscardPropertiesCommand;
+import xyz.nifeather.morph.network.commands.S2C.S2CDiscardTemporaryPropertiesCommand;
 import xyz.nifeather.morph.network.commands.S2C.S2CUpdatePropertiesCommand;
+import xyz.nifeather.morph.network.commands.S2C.S2CUpdateTemporaryPropertiesCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CRemoveAdminRevealCommand;
 import xyz.nifeather.morph.network.commands.S2C.admin.reveal.S2CSyncAdminRevealCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.*;
 import xyz.nifeather.morph.network.multiInstance.MultiInstanceService;
 import xyz.nifeather.morph.network.multiInstance.protocol.Operation;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.network.server.S2CDiscardPropertiesCommand;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.FallbackDisguiseProvider;
 import xyz.nifeather.morph.providers.disguise.PlayerDisguiseProvider;
@@ -1010,7 +1012,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
             {
                 try
                 {
-                    clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().toNetworkProperties()));
+                    clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(newState.disguisePropertyHandler().serializeNonTempProperties()));
+                    clientHandler.sendCommand(player, new S2CUpdateTemporaryPropertiesCommand(newState.disguisePropertyHandler().serializeTemporaryProperties()));
                 }
                 catch (ParseErrorException | ExecutionErrorException e)
                 {
@@ -1115,29 +1118,28 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             if (state.disposed()) return;
 
-            // fix command not sending when player rejoins
-            Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
-            Map<String ,String> diffMap = new ConcurrentHashMap<>();
-            try
-            {
-                diffMap.put(property.id(), property.forValue(value));
-            }
-            catch (ParseErrorException e)
-            {
-                logger.error("Can't generate output from value", e);
-                return;
-            }
-
-            clientHandler.sendCommand(pl, new S2CUpdatePropertiesCommand(diffMap));
+            onPropertyUpdate(player, property, value, false);
         });
 
-        propertyHandler.hookOnPropertyDiscard((property, value) ->
+        propertyHandler.hookOnTemporaryPropertyWrite((property, value) ->
         {
             if (state.disposed()) return;
 
-            // fix command not sending when player rejoins
-            Player pl = player.isConnected() ? player : Bukkit.getPlayer(player.getUniqueId());
-            clientHandler.sendCommand(pl, new S2CDiscardPropertiesCommand(List.of(property.id())));
+            onPropertyUpdate(player, property, value, true);
+        });
+
+        propertyHandler.hookOnTemporaryPropertyDiscard(property ->
+        {
+            if (state.disposed()) return;
+
+            onPropertyDiscard(player, property, true);
+        });
+
+        propertyHandler.hookOnPropertyDiscard((property) ->
+        {
+            if (state.disposed()) return;
+
+            onPropertyDiscard(player, property, false);
         });
 
         // 发送提示
@@ -1158,6 +1160,36 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                 playerOptions.shownDisplayToSelfHint = true;
             }
         }
+    }
+
+    private void onPropertyDiscard(Player receiver, SingleProperty<Object> property, boolean isTemp)
+    {
+        // fix command not sending when player rejoins
+        Player pl = receiver.isConnected() ? receiver : Bukkit.getPlayer(receiver.getUniqueId());
+
+        var cmd = isTemp
+                ? new S2CDiscardTemporaryPropertiesCommand(List.of(property.id()))
+                : new S2CDiscardPropertiesCommand(List.of(property.id()));
+
+        clientHandler.sendCommand(pl, cmd);
+    }
+
+    private void onPropertyUpdate(Player receiver, SingleProperty<Object> property, Object value, boolean isTemp)
+    {
+        // fix command not sending when player rejoins
+        Player pl = receiver.isConnected() ? receiver : Bukkit.getPlayer(receiver.getUniqueId());
+        Map<String ,String> diffMap = new ConcurrentHashMap<>();
+        try
+        {
+            diffMap.put(property.id(), property.forValue(value));
+        }
+        catch (ParseErrorException e)
+        {
+            logger.error("Can't generate output from value", e);
+            return;
+        }
+
+        clientHandler.sendCommand(pl, isTemp ? new S2CUpdateTemporaryPropertiesCommand(diffMap) : new S2CUpdatePropertiesCommand(diffMap));
     }
 
     //endregion Build and apply disguise
@@ -1220,7 +1252,8 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
         {
             try
             {
-                clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().toNetworkProperties()));
+                clientHandler.sendCommand(player, new S2CUpdatePropertiesCommand(state.disguisePropertyHandler().serializeNonTempProperties()));
+                clientHandler.sendCommand(player, new S2CUpdateTemporaryPropertiesCommand(state.disguisePropertyHandler().serializeTemporaryProperties()));
             }
             catch (ParseErrorException | ExecutionErrorException e)
             {
@@ -1595,7 +1628,7 @@ public class MorphManager extends MorphPluginObject implements IManagePlayerData
                         var parameter = MorphParameters.create(player, state.getDisguiseIdentifier());
                         try
                         {
-                            parameter.withProperties(state.disguisePropertyHandler().toNetworkProperties());
+                            parameter.withProperties(state.disguisePropertyHandler().serializeNonTempProperties());
                         }
                         catch (ParseErrorException | ExecutionErrorException e)
                         {

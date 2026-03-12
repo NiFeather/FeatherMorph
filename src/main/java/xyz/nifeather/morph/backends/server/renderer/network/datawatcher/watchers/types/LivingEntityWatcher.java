@@ -168,9 +168,9 @@ public class LivingEntityWatcher extends EntityWatcher
     }
 
     @Override
-    protected <X> void onPropertyDiscard(SingleProperty<X> property, X oldValue)
+    protected <X> void onPropertyDiscard(SingleProperty<X> property)
     {
-        super.onPropertyDiscard(property, oldValue);
+        super.onPropertyDiscard(property);
 
         if (property.id().equals(PropertyNames.LIVING_ENTITY_BED_POS))
         {

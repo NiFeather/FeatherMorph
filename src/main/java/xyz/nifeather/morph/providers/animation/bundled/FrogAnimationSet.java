@@ -22,12 +22,12 @@ public class FrogAnimationSet extends AnimationSet
                         .legacyName(AnimationNames.EAT)
                         .onPlay(state -> 
                         {
-                            state.disguisePropertyHandler().set(properties().STATIC_POSE, Pose.USING_TONGUE);
+                            state.disguisePropertyHandler().setTemp(properties().STATIC_POSE, Pose.USING_TONGUE);
 
                             var player = state.getPlayer();
                             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FROG_EAT, 1, 1);
                         })
-                        .onFinish(state -> state.disguisePropertyHandler().discardProperty(properties().STATIC_POSE));
+                        .onFinish(state -> state.disguisePropertyHandler().discardTemporaryProperty(properties().STATIC_POSE));
             })
             .addStage(b -> b.duration(0).legacyName(AnimationNames.RESET))
             .build();

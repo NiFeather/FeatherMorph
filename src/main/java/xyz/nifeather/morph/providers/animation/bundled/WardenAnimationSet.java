@@ -29,7 +29,7 @@ public class WardenAnimationSet extends AnimationSet
                         .onPlay(state ->
                         {
                             state.requestSkillState(this, true);
-                            state.disguisePropertyHandler().set(properties().STATIC_POSE, Pose.SNIFFING);
+                            state.disguisePropertyHandler().setTemp(properties().STATIC_POSE, Pose.SNIFFING);
 
                             var player = state.getPlayer();
                             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SNIFF, SoundCategory.HOSTILE, 5, 1);
@@ -37,7 +37,7 @@ public class WardenAnimationSet extends AnimationSet
                         .onFinish(state ->
                         {
                             state.requestSkillState(this, false);
-                            state.disguisePropertyHandler().discardProperty(properties().STATIC_POSE);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties().STATIC_POSE);
                         });
             })
             .addStage(b -> b.duration(0).legacyName(AnimationNames.TRY_RESET))
@@ -52,7 +52,7 @@ public class WardenAnimationSet extends AnimationSet
                         .onPlay(state ->
                         {
                             state.requestSkillState(this, true);
-                            state.disguisePropertyHandler().set(properties().STATIC_POSE, Pose.ROARING);
+                            state.disguisePropertyHandler().setTemp(properties().STATIC_POSE, Pose.ROARING);
                         })
                         .onFinish(state ->
                         {
@@ -60,7 +60,7 @@ public class WardenAnimationSet extends AnimationSet
                             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.HOSTILE, 3, 1);
 
                             state.requestSkillState(this, false);
-                            state.disguisePropertyHandler().discardProperty(properties().STATIC_POSE);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties().STATIC_POSE);
                         });
             })
             .addStage(b -> b.duration(0).legacyName(AnimationNames.ROAR_SOUND))
@@ -78,7 +78,7 @@ public class WardenAnimationSet extends AnimationSet
                         .onPlay(state ->
                         {
                             var player = state.getPlayer();
-                            state.disguisePropertyHandler().set(properties.STATIC_POSE, Pose.DIGGING);
+                            state.disguisePropertyHandler().setTemp(properties.STATIC_POSE, Pose.DIGGING);
 
                             state.requestAmbientState(this, true);
                             state.requestSkillState(this, true);
@@ -87,8 +87,8 @@ public class WardenAnimationSet extends AnimationSet
                         })
                         .onFinish(state ->
                         {
-                            state.disguisePropertyHandler().set(properties.INVISIBLE, true);
-                            state.disguisePropertyHandler().discardProperty(properties.STATIC_POSE);
+                            state.disguisePropertyHandler().setTemp(properties.INVISIBLE, true);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties.STATIC_POSE);
                             state.requestBossbarState(this, true);
                         });
             })
@@ -105,8 +105,8 @@ public class WardenAnimationSet extends AnimationSet
                         .legacyName(AnimationNames.APPEAR)
                         .onPlay(state ->
                         {
-                            state.disguisePropertyHandler().discardProperty(properties.INVISIBLE);
-                            state.disguisePropertyHandler().set(properties.STATIC_POSE, Pose.EMERGING);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties.INVISIBLE);
+                            state.disguisePropertyHandler().setTemp(properties.STATIC_POSE, Pose.EMERGING);
 
                             state.getDisguiseWrapper().getBackend().respawnDisguise(state.getDisguiseWrapper());
 
@@ -119,7 +119,7 @@ public class WardenAnimationSet extends AnimationSet
                             state.requestBossbarState(this, false);
                             state.requestSkillState(this, false);
 
-                            state.disguisePropertyHandler().discardProperty(properties.STATIC_POSE);
+                            state.disguisePropertyHandler().discardTemporaryProperty(properties.STATIC_POSE);
                         });
             })
             .addStage(b -> b.duration(0).legacyName(AnimationNames.RESET))

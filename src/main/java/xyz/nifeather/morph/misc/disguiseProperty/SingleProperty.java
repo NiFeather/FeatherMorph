@@ -186,7 +186,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
          * <br>
          * Properties with this flag would not get synced to clients via plugin message.
          *
-         * @see PropertyHandler#toNetworkProperties()
+         * @see PropertyHandler#serializeNonTempProperties()
          */
         public SinglePropertyBuilder<X> hideFromClient(boolean hideFromClient)
         {

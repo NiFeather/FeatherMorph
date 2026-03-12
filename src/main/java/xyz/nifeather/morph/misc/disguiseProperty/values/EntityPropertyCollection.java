@@ -3,9 +3,13 @@ package xyz.nifeather.morph.misc.disguiseProperty.values;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Pose;
 import org.jetbrains.annotations.ApiStatus;
+import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.ExceptionStrings;
 import xyz.nifeather.morph.misc.disguiseProperty.*;
+import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Optional;
 
 public abstract class EntityPropertyCollection<E extends Entity> extends PropertyCollection<E>
@@ -23,8 +27,33 @@ public abstract class EntityPropertyCollection<E extends Entity> extends Propert
     @ApiStatus.Experimental
     public final SingleProperty<Pose> STATIC_POSE = SingleProperty.builder(PropertyNames.ENTITY_STATIC_POSE, Pose.STANDING)
             .withInputHandle(this::readPose)
-            .withOutputHandle(OutputHandles::writeEnum)
+            .withOutputHandle(OutputHandles::writeEnumOrdinal) // Bukkit has different name comparing to vanilla Minecraft 🫠
+            .withSuggestions(Arrays.stream(Pose.values()).map(p -> p.name().toLowerCase()).toList())
+            .withValidator(this::validatePosePermission)
             .build();
+
+    private void validatePosePermission(Pose pose, Entity entity, EnumSet<ValidationSkipFlag> skipFlags)
+            throws PropertyValidationException
+    {
+        if (skipFlags.contains(ValidationSkipFlag.SKIP_PERMISSIONS))
+            return;
+
+        if (pose == Pose.STANDING
+                || pose == Pose.SNEAKING
+                || pose == Pose.FALL_FLYING
+                || pose == Pose.SLEEPING)
+        {
+            return;
+        }
+
+        if (!entity.hasPermission(CommonPermissions.LIMITED_POSES))
+        {
+            throw PropertyValidationException.forProperty(PropertyNames.ENTITY_STATIC_POSE)
+                    .withLocalizableMessage(CommandStrings.noPermissionMessage())
+                    .withMessage("Player don't have permission to set limited poses.")
+                    .create();
+        }
+    }
 
     private Optional<Pose> readPose(String propertyName, String input)
             throws ParseErrorException
