@@ -348,4 +348,10 @@ public class EntityWatcher extends SingleWatcher
     {
         // do nothing.
     }
+
+    @Override
+    public void playEntityAnimation(String animateName)
+    {
+        // also do nothing.
+    }
 }

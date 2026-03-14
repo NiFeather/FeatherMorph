@@ -34,6 +34,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
+import xyz.nifeather.morph.network.server.S2CEntityAnimateCommand;
 import xyz.nifeather.morph.utilities.AttributeUtils;
 
 import java.util.List;
@@ -339,6 +340,28 @@ public class LivingEntityWatcher extends EntityWatcher
         }
 
         writeTemp(values.BED_POS, bedPos);
+    }
+
+    @Override
+    public void playEntityAnimation(String animateName)
+    {
+        if (isSilent())
+            return;
+
+        WrapperPlayServerEntityAnimation.EntityAnimationType animationType = switch (animateName)
+        {
+            case S2CEntityAnimateCommand.ANIM_SWING_MAINHAND -> WrapperPlayServerEntityAnimation.EntityAnimationType.SWING_MAIN_ARM;
+            case S2CEntityAnimateCommand.ANIM_SWING_OFFHAND -> WrapperPlayServerEntityAnimation.EntityAnimationType.SWING_OFF_HAND;
+
+            default -> null;
+        };
+
+        if (animationType == null)
+            return;
+
+        var packet = new WrapperPlayServerEntityAnimation(this.readEntryOrThrow(CustomEntries.SPAWN_ID), animationType);
+        sendPacketToAffectedPlayers(packet);
+        super.playEntityAnimation(animateName);
     }
 
     @Override

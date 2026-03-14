@@ -198,6 +198,13 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         bindingWatcher.writeEntry(CustomEntries.ATTACK_ANIMATION, true);
     }
 
+    @Override
+    public void playEntityAnimation(String animateName)
+    {
+        if (bindingWatcher != null)
+            bindingWatcher.playEntityAnimation(animateName);
+    }
+
     private Player bindingPlayer;
 
     public Player getBindingPlayer()

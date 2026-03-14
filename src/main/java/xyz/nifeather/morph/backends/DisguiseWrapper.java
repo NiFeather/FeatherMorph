@@ -155,6 +155,7 @@ public abstract class DisguiseWrapper<TInstance>
     {
     }
 
+    @Deprecated
     public void playAttackAnimation()
     {
     }
@@ -192,4 +193,6 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract void unSubscribeEvent(Object source, WrapperEvent<?> wrapperEvent);
 
     public abstract void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute);
+
+    public abstract void playEntityAnimation(String animateName);
 }

@@ -699,4 +699,6 @@ public abstract class SingleWatcher extends MorphPluginObject
      * @param attribute
      */
     public abstract void writeEntityAttribute(NamespacedKey id, AttributeInstance attribute);
+
+    public abstract void playEntityAnimation(String animateName);
 }

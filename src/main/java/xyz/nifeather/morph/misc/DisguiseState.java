@@ -39,6 +39,7 @@ import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
+import xyz.nifeather.morph.network.server.S2CEntityAnimateCommand;
 import xyz.nifeather.morph.providers.animation.PlayableAction;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.skills.ISkill;
@@ -171,19 +172,6 @@ public class DisguiseState extends MorphPluginObject
     @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
 
-    private void handleInternalExec(String animationSubId)
-    {
-        switch (animationSubId)
-        {
-            case AnimationNames.INTERNAL_DISABLE_AMBIENT -> this.requestAmbientState(this, true);
-            case AnimationNames.INTERNAL_ENABLE_AMBIENT -> this.requestAmbientState(this, false);
-            case AnimationNames.INTERNAL_DISABLE_SKILL -> this.requestSkillState(this, true);
-            case AnimationNames.INTERNAL_ENABLE_SKILL -> this.requestSkillState(this, false);
-            case AnimationNames.INTERNAL_DISABLE_BOSSBAR -> this.requestBossbarState(this, true);
-            case AnimationNames.INTERNAL_ENABLE_BOSSBAR -> this.requestBossbarState(this, false);
-        }
-    }
-
     private final List<Object> disableSkillRequests = Collections.synchronizedList(new ObjectArrayList<>());
     private final List<Object> disableAmbientRequests = Collections.synchronizedList(new ObjectArrayList<>());
     private final List<Object> disableBossbarRequests = Collections.synchronizedList(new ObjectArrayList<>());
@@ -248,14 +236,14 @@ public class DisguiseState extends MorphPluginObject
 
     private final AnimationHandler actionHandler = new AnimationHandler();
 
-    public void stopAnimations()
+    public void stopActions()
     {
         actionHandler.reset();
     }
 
     public void onPlayerQuit()
     {
-        this.stopAnimations();
+        this.stopActions();
 
         this.abilityUpdater.onPlayerOffline();
         this.getDisguiseWrapper().onPlayerOffline();
@@ -319,6 +307,17 @@ public class DisguiseState extends MorphPluginObject
     public AnimationHandler getActionHandler()
     {
         return actionHandler;
+    }
+
+    /**
+     * See {@link net.minecraft.network.protocol.game.ClientboundAnimatePacket}
+     * @param animateName
+     */
+    @ApiStatus.Experimental
+    public void playEntityAnimation(String animateName)
+    {
+        clientHandler.sendCommand(getPlayer(), new S2CEntityAnimateCommand(animateName));
+        disguiseWrapper.playEntityAnimation(animateName);
     }
 
     /**
