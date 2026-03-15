@@ -3,8 +3,11 @@ package xyz.nifeather.morph.events;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
+import io.papermc.paper.datacomponent.DataComponentType;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.CreakingHeart;
 import org.bukkit.entity.Entity;
@@ -18,6 +21,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Initializer;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xiamomc.pluginbase.Bindables.Bindable;
@@ -36,6 +41,7 @@ import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.ModNetworkingHelper;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
 import xyz.nifeather.morph.misc.permissions.CommonPermissions;
 import xyz.nifeather.morph.network.Constants;
@@ -45,6 +51,7 @@ import xyz.nifeather.morph.network.server.MorphClientHandler;
 import xyz.nifeather.morph.network.server.ServerSetEquipCommand;
 import xyz.nifeather.morph.skills.SkillManager;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
+import xyz.nifeather.morph.utilities.ItemUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -75,6 +82,8 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
 
     private final Bindable<Boolean> allowAcquireMorphs = new Bindable<>(false);
 
+    private final Bindable<Boolean> tryOverwriteDeathMessages = new Bindable<>(false);
+
     @Initializer
     private void load()
     {
@@ -83,6 +92,7 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
         config.bind(doRevealing, ConfigOptions.REVEALING);
         config.bind(allowAcquireMorphs, ConfigOptions.ALLOW_ACQUIRE_MORPHS);
         config.bind(unMorphOnDeath, ConfigOptions.UNMORPH_ON_DEATH);
+        config.bind(tryOverwriteDeathMessages, ConfigOptions.ENABLE_OVERWRITE_DEATH_MESSAGE);
 
         this.addSchedule(this::update);
     }
@@ -160,6 +170,85 @@ public class CommonEventProcessor extends MorphPluginObject implements Listener
     {
         if (unMorphOnDeath.get())
             morphs.unMorph(e.getPlayer(), e.getPlayer(), true, true);
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onDeath(PlayerDeathEvent e)
+    {
+        setCustomDeathMessageIfPossible(e);
+    }
+
+    public Component getDisguiseNameIfPossible(Entity entity)
+    {
+        var state = morphs.getDisguiseStateFor(entity);
+        if (state == null) return entity.name();
+
+        var nameComponent = state.disguisePropertyHandler().getOr(PropertyNames.ENTITY_CUSTOM_NAME, null);
+        if (!(nameComponent instanceof Component customName))
+            return state.getProvider().getClientLocalizableName(state.getDisguiseIdentifier());
+
+        return customName;
+    }
+
+    /**
+     * Reimplement of {@link net.minecraft.world.damagesource.DamageSource#getLocalizedDeathMessage(net.minecraft.world.entity.LivingEntity)}
+     */
+    private void setCustomDeathMessageIfPossible(PlayerDeathEvent event)
+    {
+        if (!tryOverwriteDeathMessages.get())
+            return;
+
+        var damageSource = event.getDamageSource();
+
+        var causingEntity = damageSource.getCausingEntity();
+        var directEntity = damageSource.getDirectEntity();
+        var key = "death.attack." + damageSource.getDamageType().getTranslationKey();
+
+        @Nullable Component customMessage = null;
+
+        Component vicitmName = getDisguiseNameIfPossible(event.getPlayer());
+
+        // See NMS DamageSource#getLocalizedDeathMessage
+        if (causingEntity == null && directEntity == null)
+        {
+            var killer = event.getPlayer().getKiller();
+            customMessage = killer == null
+                    ? Component.translatable(key).arguments(vicitmName)
+                    : Component.translatable(key + ".player").arguments(vicitmName, getDisguiseNameIfPossible(killer));
+        }
+        else
+        {
+            Component killerName = causingEntity == null
+                    ? getDisguiseNameIfPossible(directEntity)
+                    : getDisguiseNameIfPossible(causingEntity);
+
+            ItemStack weapon = ItemUtils.air;
+
+            if (causingEntity instanceof LivingEntity causingLiving)
+            {
+                var equipment = causingLiving.getEquipment();
+
+                if (equipment != null)
+                    weapon = equipment.getItemInMainHand();
+            }
+
+            customMessage = (!weapon.isEmpty() && weapon.hasData(DataComponentTypes.CUSTOM_NAME))
+                    ? Component.translatable(key + ".item").arguments(vicitmName, killerName, weapon.displayName())
+                    : Component.translatable(key).arguments(vicitmName, killerName);
+        }
+
+        var originalMessage = event.deathMessage();
+        if (originalMessage != null)
+        {
+            var c = Component.text("The original death message: \"")
+                    .append(originalMessage)
+                    .append(Component.text("\" Is going to replaced by: "))
+                    .append(customMessage);
+
+            plugin.getComponentLogger().info(c);
+        }
+
+        event.deathMessage(customMessage);
     }
 
     @EventHandler

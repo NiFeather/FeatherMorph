@@ -359,6 +359,11 @@ public class ConfigOptions
             .defaultValue(true)
             .build();
 
+    public static final ConfigOption<Boolean> ENABLE_OVERWRITE_DEATH_MESSAGE = ConfigOption.builder(Boolean.class)
+            .node(ConfigNode.create().append("try_overwrite_death_messages"))
+            .defaultValue(false)
+            .build();
+
     public static final ConfigOption<Integer> VERSION = ConfigOption.builder(Integer.class)
             .node(ConfigNode.create().append("version"))
             .defaultValue(0)
