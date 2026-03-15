@@ -20,6 +20,13 @@ root:
   # If an invalid ID is provided, this option may not take place.
   forced_disguise: "@none"
 
+  # Whether to try to overwrite the death message depending on the victim and the killer's current disguise.
+  # Maybe only suitable if the server only has you and your friends...
+  #
+  # NOTE: Due to how the death message works, we can't insert reveal names that are only visible to admins to the message :(
+  #       Instead, we log the original message and the overwritten message to the console, in case someone wants to investigate.
+  try_overwrite_death_messages: false
+
   # Modify mobs' AI to make them react to disguises?
   #
   # PS: !!!This option requires a server restart to make changes!!!
@@ -314,4 +321,4 @@ root:
   debug_output: false
 
   # Do not touch unless you know what you're doing!
-  version: 48
+  version: 49

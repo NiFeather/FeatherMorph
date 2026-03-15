@@ -270,4 +270,10 @@ public class PlayerDisguiseProvider extends DefaultDisguiseProvider
 
         return finalName;
     }
+
+    @Override
+    public Component getClientLocalizableName(String disguiseIdentifier)
+    {
+        return getDisplayName(disguiseIdentifier, null);
+    }
 }

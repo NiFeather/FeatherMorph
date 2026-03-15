@@ -406,4 +406,12 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
         else
             return masterVanillaMessageStore.getComponent(type.translationKey(), null, locale);
     }
+
+    @Override
+    public Component getClientLocalizableName(String disguiseIdentifier)
+    {
+        var type = EntityTypeUtils.fromString(disguiseIdentifier, true);
+
+        return type == null ? Component.text("???") : Component.translatable(type.translationKey());
+    }
 }

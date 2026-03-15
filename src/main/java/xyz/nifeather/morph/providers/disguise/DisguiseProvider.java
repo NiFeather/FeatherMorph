@@ -185,6 +185,13 @@ public abstract class DisguiseProvider extends MorphPluginObject
     public abstract Component getDisplayName(String disguiseIdentifier, @Nullable String locale);
 
     /**
+     * Gets display name of the given disguise which is localizable on the client side.
+     * @param disguiseIdentifier ID of the target disguise
+     * @return A {@link Component} that's localizable on the client side (A translatable Component)
+     */
+    public abstract Component getClientLocalizableName(String disguiseIdentifier);
+
+    /**
      * Validate if the given disguise can be used for player's situation
      * @return TRUE if we can continue
      */
