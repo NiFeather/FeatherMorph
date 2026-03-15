@@ -60,6 +60,7 @@ public class SkillsConfigurationStoreNew extends DirectoryJsonBasedStorage<Skill
             else
             {
                 saveDefaultGeneratedConfigurations();
+                setPackageVersion(TARGET_PACKAGE_VERSION);
                 return;
             }
         }
