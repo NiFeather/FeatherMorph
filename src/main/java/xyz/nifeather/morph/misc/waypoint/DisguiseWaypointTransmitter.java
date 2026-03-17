@@ -82,7 +82,12 @@ public class DisguiseWaypointTransmitter implements IDisguiseWaypointTransmitter
                 var lastWaypoints = getWaypointManager(lastWorld);
 
                 if (lastWaypoints != null)
-                    lastWorld.getWaypointManager().untrackWaypoint(this);
+                {
+                    var lastWaypointManager = getWaypointManager(lastWorld);
+
+                    if (lastWaypointManager != null)
+                        lastWaypointManager.untrackWaypoint(this);
+                }
             }
 
             transmitting = false;
