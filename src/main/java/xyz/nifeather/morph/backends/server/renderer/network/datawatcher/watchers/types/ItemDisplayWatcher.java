@@ -19,10 +19,14 @@ public class ItemDisplayWatcher extends DisplayEntityWatcher
     }
 
     @Override
-    public void beginSelfUpdateIfAny()
+    public void onDisguiseApply()
     {
-        super.beginSelfUpdateIfAny();
+        super.onDisguiseApply();
+        beginSelfUpdateIfAny();
+    }
 
+    private void beginSelfUpdateIfAny()
+    {
         var player = getBindingPlayer();
         this.scheduleOn(player, () -> selfUpdate(player));
     }

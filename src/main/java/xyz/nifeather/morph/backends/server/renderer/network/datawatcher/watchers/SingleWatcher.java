@@ -651,7 +651,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public abstract boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType);
 
-    public void beginSelfUpdateIfAny()
+    public void onDisguiseApply()
     {
     }
 

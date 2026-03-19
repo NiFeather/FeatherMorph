@@ -184,7 +184,7 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
         try
         {
             serverRenderer.scheduleDisguise(watcher, WatcherUtils.getAffectedPlayers(player));
-            watcher.beginSelfUpdateIfAny();
+            watcher.onDisguiseApply();
         }
         catch (NullDependencyException e)
         {
