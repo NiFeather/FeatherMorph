@@ -2,8 +2,6 @@ package xyz.nifeather.morph.backends.server.renderer;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import org.bukkit.Bukkit;
@@ -21,7 +19,8 @@ import xyz.nifeather.morph.backends.server.ServerBackend;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolHandler;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.PlayerWatcher;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.AbstractPlayerWatcher;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.RecoveringPlayerWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RegisterParameters;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
@@ -147,7 +146,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
         if (player == null) return;
 
         var protocolManager = PacketEvents.getAPI().getPlayerManager();
-        PlayerWatcher watcher = new PlayerWatcher(player);
+        AbstractPlayerWatcher watcher = new RecoveringPlayerWatcher(player);
         watcher.markSilent(this);
 
         watcher.writeEntry(CustomEntries.PROFILE, ((CraftPlayer) player).getProfile());
