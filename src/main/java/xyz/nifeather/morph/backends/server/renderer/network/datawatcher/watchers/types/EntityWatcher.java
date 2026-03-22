@@ -198,8 +198,8 @@ public class EntityWatcher extends SingleWatcher
         if (spawnUUID.equals(Uuids.NIL_UUID))
             throw new IllegalStateException("A watcher with NIL UUID?!");
 
-        //var packetDestroy = new WrapperPlayServerDestroyEntities(this.readEntryOrThrow(CustomEntries.SPAWN_ID));
-        //packets.add(packetDestroy);
+        var packetDestroy = new WrapperPlayServerDestroyEntities(this.readEntryOrThrow(CustomEntries.SPAWN_ID));
+        packets.add(packetDestroy);
 
         //todo: Should we use a better way to get the yaw/pitch?
         //      I don't want to read yaw/pitch from player directly, so I used OVERLAYED_XXX to generate the value on call, so that other watchers can override the value
