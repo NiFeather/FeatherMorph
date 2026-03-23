@@ -159,7 +159,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
 
         try
         {
-            playerSpawnPackets = watcher.buildSpawnPackets(false);
+            playerSpawnPackets = watcher.buildSpawnPackets();
         }
         catch (BuildFailedException e)
         {

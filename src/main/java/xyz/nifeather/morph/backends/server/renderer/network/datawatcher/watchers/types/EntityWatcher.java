@@ -189,10 +189,9 @@ public class EntityWatcher extends SingleWatcher
     public static final int PACKET_MARK = 10998;
 
     private List<PacketWrapper<?>> buildSpawnPacketsFor(Player player)
+            throws BuildFailedException
     {
         List<PacketWrapper<?>> packets = new ObjectArrayList<>();
-
-        var nmsPlayer = NmsRecord.ofPlayer(player);
 
         UUID spawnUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
         if (spawnUUID.equals(Uuids.NIL_UUID))
@@ -217,8 +216,7 @@ public class EntityWatcher extends SingleWatcher
                 new Vector3d(playerMotion.getX(), playerMotion.getY(), playerMotion.getZ())
         );
 
-        logger.info("Spawn UUID " + spawnUUID);
-
+        packets.addAll(preSpawnPackets());
         packets.add(spawnPacket);
         packets.add(PacketFactory.buildFullMetaPacket(player, this));
 
@@ -246,6 +244,12 @@ public class EntityWatcher extends SingleWatcher
         // 属性交由 LivingEntityWatcher 添加
 
         return packets;
+    }
+
+    protected Collection<? extends PacketWrapper<?>> preSpawnPackets()
+            throws BuildFailedException
+    {
+        return Collections.emptyList();
     }
 
     @Override
