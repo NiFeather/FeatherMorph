@@ -131,23 +131,6 @@ public abstract class AbstractPlayerWatcher extends LivingEntityWatcher
         return List.of(infoRemove, infoUpdate);
     }
 
-    public List<PacketWrapper<?>> buildSpawnPackets(boolean includePlayerInfo) throws BuildFailedException
-    {
-        var list = new ObjectArrayList<PacketWrapper<?>>();
-
-        var gameProfile = this.readEntryOrThrow(CustomEntries.PROFILE);
-
-        if (gameProfile.name().isBlank())
-            throw new IllegalArgumentException("GameProfile name is empty!");
-
-        if (includePlayerInfo)
-            list.addAll(this.buildPlayerInfoPackets());
-
-        list.addAll(super.buildSpawnPackets());
-
-        return list;
-    }
-
     @Override
     public List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException
     {
@@ -157,12 +140,6 @@ public abstract class AbstractPlayerWatcher extends LivingEntityWatcher
         list.add(playerInfoRmPacket);
 
         return list;
-    }
-
-    @Override
-    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
-    {
-        return buildSpawnPackets(true);
     }
 
     @Override
