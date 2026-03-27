@@ -39,7 +39,8 @@ import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.network.server.S2CEntityAnimateCommand;
+import xyz.nifeather.morph.network.server.frog.S2CEntityAnimateCommand;
+import xyz.nifeather.morph.network.server.frog.S2CUpdateEntityAnimateMaskCommand;
 import xyz.nifeather.morph.providers.animation.PlayableAction;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.skills.ISkill;
@@ -318,6 +319,17 @@ public class DisguiseState extends MorphPluginObject
     {
         clientHandler.sendCommand(getPlayer(), new S2CEntityAnimateCommand(animateName));
         disguiseWrapper.playEntityAnimation(animateName);
+    }
+
+    /**
+     * Set whether allow disguise to play several entity animates triggered by the player. <br>
+     * Note that this doesn't affect {@link DisguiseState#playEntityAnimation(String)}
+     */
+    @ApiStatus.Experimental
+    public void updateEntityAnimateMask(String animateName, boolean isAllowed)
+    {
+        clientHandler.sendCommand(getPlayer(), new S2CUpdateEntityAnimateMaskCommand(animateName, isAllowed));
+        disguiseWrapper.updateEntityAnimateMask(animateName, isAllowed);
     }
 
     /**

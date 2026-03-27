@@ -1,4 +1,4 @@
-package xyz.nifeather.morph.network.server;
+package xyz.nifeather.morph.network.server.frog;
 
 import org.jetbrains.annotations.ApiStatus;
 import xyz.nifeather.morph.network.BasicServerHandler;

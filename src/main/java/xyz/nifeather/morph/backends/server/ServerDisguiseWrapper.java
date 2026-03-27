@@ -205,6 +205,13 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             bindingWatcher.playEntityAnimation(animateName);
     }
 
+    @Override
+    public void updateEntityAnimateMask(String animateName, boolean isAllowed)
+    {
+        if (bindingWatcher != null)
+            bindingWatcher.updateEntityAnimateMaskStatus(animateName, isAllowed);
+    }
+
     private Player bindingPlayer;
 
     public Player getBindingPlayer()

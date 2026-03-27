@@ -45,7 +45,7 @@ public class AnimationPacketListener extends ProtocolListener
         // Don't cancel for the source
         if (event.getPlayer().equals(sourcePlayer)) return;
 
-        if (!watcher.haveAnimation(packet.getType()))
+        if (!watcher.skipEntityAnimate(packet.getType()) && !watcher.haveAnimation(packet.getType()))
             event.setCancelled(true);
     }
 }

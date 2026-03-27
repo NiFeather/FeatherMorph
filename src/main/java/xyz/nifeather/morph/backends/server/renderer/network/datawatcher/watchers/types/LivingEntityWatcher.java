@@ -10,6 +10,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateAttributes;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.InteractionHand;
@@ -34,7 +35,7 @@ import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
-import xyz.nifeather.morph.network.server.S2CEntityAnimateCommand;
+import xyz.nifeather.morph.network.server.frog.S2CEntityAnimateCommand;
 import xyz.nifeather.morph.utilities.AttributeUtils;
 
 import java.util.List;
@@ -342,6 +343,8 @@ public class LivingEntityWatcher extends EntityWatcher
         writeTemp(values.BED_POS, bedPos);
     }
 
+    private final List<WrapperPlayServerEntityAnimation.EntityAnimationType> skipAnimates = ObjectLists.synchronize(new ObjectArrayList<>());
+
     @Override
     public void playEntityAnimation(String animateName)
     {
@@ -360,13 +363,55 @@ public class LivingEntityWatcher extends EntityWatcher
             return;
 
         var packet = new WrapperPlayServerEntityAnimation(this.readEntryOrThrow(CustomEntries.SPAWN_ID), animationType);
+
+        skipAnimates.add(animationType);
         sendPacketToAffectedPlayers(packet);
+
         super.playEntityAnimation(animateName);
+    }
+
+    @Override
+    public boolean skipEntityAnimate(WrapperPlayServerEntityAnimation.EntityAnimationType type)
+    {
+        return skipAnimates.remove(type);
+    }
+
+    /**
+     * @param animationType PacketEvents' EntityAnimationType
+     * @return The corresponding name at FeatherMorph's side, {@code null} if not supported.
+     */
+    @Nullable
+    protected String getMorphAnimateName(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
+    {
+        return switch (animationType)
+        {
+            case SWING_MAIN_ARM -> S2CEntityAnimateCommand.ANIM_SWING_MAINHAND;
+            case SWING_OFF_HAND -> S2CEntityAnimateCommand.ANIM_SWING_OFFHAND;
+            default -> null;
+        };
     }
 
     @Override
     public boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
     {
-        return animationType != WrapperPlayServerEntityAnimation.EntityAnimationType.WAKE_UP;
+        @Nullable String asMorphAnimateName = getMorphAnimateName(animationType);
+
+        return animationType != WrapperPlayServerEntityAnimation.EntityAnimationType.WAKE_UP
+                && (asMorphAnimateName == null || !blockedEntityAnimates.contains(asMorphAnimateName));
+    }
+
+    protected final List<String> blockedEntityAnimates = ObjectLists.synchronize(new ObjectArrayList<>());
+
+    @Override
+    public void updateEntityAnimateMaskStatus(String animateName, boolean isAllowed)
+    {
+        var alreadyBlocking = blockedEntityAnimates.contains(animateName);
+
+        if (isAllowed)
+            blockedEntityAnimates.remove(animateName);
+        else if (!alreadyBlocking)
+            blockedEntityAnimates.add(animateName);
+
+        super.updateEntityAnimateMaskStatus(animateName, isAllowed);
     }
 }

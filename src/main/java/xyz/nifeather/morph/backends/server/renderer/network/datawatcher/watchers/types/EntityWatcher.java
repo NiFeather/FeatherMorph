@@ -358,4 +358,10 @@ public class EntityWatcher extends SingleWatcher
     {
         // also do nothing.
     }
+
+    @Override
+    public void updateEntityAnimateMaskStatus(String animateName, boolean isAllowed)
+    {
+        // do nothing.
+    }
 }

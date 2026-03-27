@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.commands;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -178,6 +179,50 @@ public class DebugTestCommand extends BrigadierCommand
                             return 0;
                         })
                         .build()
+        );
+
+        dispatcher.register(
+                Commands.literal("disguise_animate")
+                        .then(
+                                Commands.argument("name", StringArgumentType.string())
+                                        .executes(ctx ->
+                                        {
+                                            var sender = ctx.getSource().getSender();
+                                            var morph = morphManager.getDisguiseStateFor(ctx.getSource().getExecutor());
+                                            if (morph == null)
+                                            {
+                                                sender.sendMessage("No morph!");
+                                                return 1;
+                                            }
+
+                                            var name = StringArgumentType.getString(ctx, "name");
+                                            morph.playEntityAnimation(name);
+
+                                            sender.sendMessage("Ok playing %s!".formatted(name));
+                                            return 1;
+                                        })
+                                        .then(
+                                                Commands.argument("is_allowed", BoolArgumentType.bool())
+                                                        .executes(ctx ->
+                                                        {
+                                                            var sender = ctx.getSource().getSender();
+                                                            var morph = morphManager.getDisguiseStateFor(ctx.getSource().getExecutor());
+                                                            if (morph == null)
+                                                            {
+                                                                sender.sendMessage("No morph!");
+                                                                return 1;
+                                                            }
+
+                                                            var name = StringArgumentType.getString(ctx, "name");
+                                                            var allowed =  BoolArgumentType.getBool(ctx, "is_allowed");
+
+                                                            morph.updateEntityAnimateMask(name, allowed);
+                                                            sender.sendMessage("Ok Animate %s is now status %s".formatted(name, allowed));
+
+                                                            return 0;
+                                                        })
+                                        )
+                        ).build()
         );
 
         return true;

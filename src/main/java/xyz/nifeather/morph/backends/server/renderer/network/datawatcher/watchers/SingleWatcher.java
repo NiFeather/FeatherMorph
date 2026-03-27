@@ -701,4 +701,13 @@ public abstract class SingleWatcher extends MorphPluginObject
     public abstract void writeEntityAttribute(NamespacedKey id, AttributeInstance attribute);
 
     public abstract void playEntityAnimation(String animateName);
+    public abstract void updateEntityAnimateMaskStatus(String animateName, boolean isAllowed);
+
+    /**
+     * Whether to tell {@link xyz.nifeather.morph.backends.server.renderer.network.listeners.AnimationPacketListener} to skip detecting the given entity animate.
+     */
+    public boolean skipEntityAnimate(WrapperPlayServerEntityAnimation.EntityAnimationType type)
+    {
+        return false;
+    }
 }

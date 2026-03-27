@@ -155,6 +155,7 @@ public abstract class AbstractPlayerWatcher extends LivingEntityWatcher
     @Override
     public boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
     {
-        return true;
+        var asMorphAnimateName = getMorphAnimateName(animationType);
+        return asMorphAnimateName == null || !blockedEntityAnimates.contains(asMorphAnimateName);
     }
 }

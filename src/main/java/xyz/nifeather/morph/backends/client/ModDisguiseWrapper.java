@@ -155,6 +155,11 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     }
 
     @Override
+    public void updateEntityAnimateMask(String animateName, boolean isAllowed)
+    {
+    }
+
+    @Override
     public CompoundTag getCompound()
     {
         return new CompoundTag();

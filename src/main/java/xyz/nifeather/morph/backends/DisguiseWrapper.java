@@ -195,4 +195,5 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute);
 
     public abstract void playEntityAnimation(String animateName);
+    public abstract void updateEntityAnimateMask(String animateName, boolean isAllowed);
 }
