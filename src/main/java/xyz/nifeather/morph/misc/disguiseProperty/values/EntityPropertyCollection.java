@@ -58,6 +58,25 @@ public abstract class EntityPropertyCollection<E extends Entity> extends Propert
     private Optional<Pose> readPose(String propertyName, String input)
             throws ParseErrorException
     {
+        try
+        {
+            int index = Integer.parseInt(input);
+            var values = Pose.values();
+
+            if (index >= values.length)
+            {
+                throw ParseErrorException.forProperty(propertyName)
+                        .withLocalizableMessage(ExceptionStrings.noValueMatch())
+                        .withMessage("Pose does not contain an enum with index %s".formatted(index))
+                        .create();
+            }
+
+            return Optional.of(values[index]);
+        }
+        catch (NumberFormatException _)
+        {
+        }
+
         return InputHandles.readEnumNonNull(Pose.values(), propertyName, input);
     }
 
