@@ -73,7 +73,7 @@ public abstract class EntityPropertyCollection<E extends Entity> extends Propert
 
             return Optional.of(values[index]);
         }
-        catch (NumberFormatException _)
+        catch (NumberFormatException ignored)
         {
         }
 
