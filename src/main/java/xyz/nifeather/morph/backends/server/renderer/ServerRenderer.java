@@ -128,7 +128,7 @@ public class ServerRenderer extends MorphPluginObject implements Listener
     public void sendDisguise(@NotNull SingleWatcher watcher, List<Player> affectedPlayers)
         throws BuildFailedException
     {
-        if (affectedPlayers.isEmpty()) return;
+        if (affectedPlayers.isEmpty() || watcher.disposed()) return;
 
         var protocolManager = PacketEvents.getAPI().getPlayerManager();
         var spawnPackets = watcher.buildSpawnPackets();
