@@ -7,6 +7,8 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 public class PiglinWatcher extends LivingEntityWatcher
 {
@@ -24,26 +26,14 @@ public class PiglinWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.onEntryWrite(entry, oldVal, newVal);
+        super.onPropertyWrite(property, value);
 
-        if (entry.equals(CustomEntries.ANIMATION))
+        if (property.id().equals(PropertyNames.PIGLIN_DANCING))
         {
-            var animId = newVal.toString();
-            var player = getBindingPlayer();
-            var world = player.getWorld();
-
-            switch (animId)
-            {
-                case AnimationNames.DANCE_START ->
-                {
-                    this.writePersistent(ValueIndex.PIGLIN.DANCING, true);
-                    world.playSound(player.getLocation(), Sound.ENTITY_PIGLIN_CELEBRATE, 1, 1);
-                }
-                case AnimationNames.STOP, AnimationNames.RESET -> this.writePersistent(ValueIndex.PIGLIN.DANCING, false);
-            }
+            var dancing = (Boolean) value;
+            this.writePersistent(ValueIndex.PIGLIN.DANCING, dancing);
         }
     }
-
 }

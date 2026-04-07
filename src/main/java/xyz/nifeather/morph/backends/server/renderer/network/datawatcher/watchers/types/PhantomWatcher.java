@@ -42,10 +42,14 @@ public class PhantomWatcher extends LivingEntityWatcher
     @Override
     public <X> @Nullable X readEntry(CustomEntry<X> entry)
     {
+        var existing = super.readEntry(entry);
+        if (existing != null)
+            return existing;
+
         if (Objects.equals(entry, CustomEntries.OVERLAYED_PITCH))
             return (X) Float.valueOf(-getBindingPlayer().getPitch());
 
-        return super.readEntry(entry);
+        return null;
     }
 
     @Override

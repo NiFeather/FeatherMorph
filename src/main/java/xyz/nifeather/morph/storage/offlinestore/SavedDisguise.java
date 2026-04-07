@@ -38,7 +38,7 @@ public class SavedDisguise
         instance.disguiseIdentifier = state.getDisguiseIdentifier();
         try
         {
-            instance.properties.putAll(state.disguisePropertyHandler().toNetworkProperties());
+            instance.properties.putAll(state.disguisePropertyHandler().serializeNonTempProperties());
         }
         catch (ParseErrorException | ExecutionErrorException e)
         {

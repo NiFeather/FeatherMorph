@@ -1,20 +1,38 @@
 package xyz.nifeather.morph.providers.animation.bundled;
 
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PandaPropertyCollection;
 import xyz.nifeather.morph.providers.animation.AnimationSet;
-import xyz.nifeather.morph.providers.animation.SingleAnimation;
-
-import java.util.List;
+import xyz.nifeather.morph.providers.animation.PlayableAction;
 
 public class PandaAnimationSet extends AnimationSet
 {
-    public final SingleAnimation SIT = new SingleAnimation(AnimationNames.SIT, 5, true);
-    public final SingleAnimation STANDUP = new SingleAnimation(AnimationNames.STANDUP, 5, true);
+    private static PandaPropertyCollection properties()
+    {
+        return DisguiseProperties.INSTANCE.getCollectionOrThrow(PandaPropertyCollection.class);
+    }
+
+    public final PlayableAction SIT = PlayableAction.builder()
+            .addStage(b ->
+                    b.duration(5)
+                            .legacyName(AnimationNames.SIT)
+                            .onPlay(state -> state.disguisePropertyHandler().setTemp(properties().SITTING, true)))
+            .build();
+
+    public final PlayableAction STAND = PlayableAction.builder()
+            .addStage(b ->
+                    b.duration(5)
+                            .legacyName(AnimationNames.STANDUP)
+                            .onPlay(state -> state.disguisePropertyHandler().setTemp(properties().SITTING, false)))
+            .addStage(b ->
+                    b.duration(0)
+                            .legacyName(AnimationNames.RESET))
+            .build();
 
     public PandaAnimationSet()
     {
-        registerPersistent(AnimationNames.SIT, List.of(SIT));
-
-        registerCommon(AnimationNames.STANDUP, List.of(STANDUP, RESET));
+        register(AnimationNames.SIT, SIT);
+        register(AnimationNames.STANDUP, STAND);
     }
 }

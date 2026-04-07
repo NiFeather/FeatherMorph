@@ -2,29 +2,56 @@ package xyz.nifeather.morph.misc.disguiseProperty;
 
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
+/**
+ * A disguise property
+ * @param identifier The identifier(ID) of this property.
+ * @param defaultVal Default value for this property.
+ * @param type Class type of the default value.
+ * @param inputHandle An {@link InputHandle} which deserializes the input String to an instance of the type.
+ * @param outputHandle An {@link OutputHandle} which serializes the value to String.
+ * @param propertyValidator An {@link IPropertyValidator} to validate if the value is legit, and the player has permission to use this property.
+ * @param postProcessHandle An {@link IPostProcessHandle}, used to make changes to the {@link PropertyHandler} for properties that has difficult to directly apply to the disguise. For example: {@link xyz.nifeather.morph.misc.disguiseProperty.values.HappyGhastPropertyCollection#HARNESS}
+ * @param randomValues Available random values for this property. Mostly used by PropertyCollections. For example: {@link xyz.nifeather.morph.misc.disguiseProperty.values.AxolotlPropertyCollection#setupDefaultProperties(PropertyHandler)}
+ * @param suggestions Available suggestions for this property.
+ * @param restoreDefaultsBeforeDiscard Whether we should restore the default value before we discard the property.
+ * @param hideFromUserInput {@code true} if this property should be hidden in places like Command Suggestions.
+ * @param hideFromClient {@code true} if this property should not be sent to the client when syncing properties.
+ */
 public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, InputHandle<T> inputHandle,
-                                OutputHandle<T> outputHandle, IPropertyValidator<T> propertyValidator,
-                                List<T> randomValues, List<String> suggestions,
+                                OutputHandle<T> outputHandle, IPropertyValidator<T> propertyValidator, IPostProcessHandle<T> postProcessHandle,
+                                List<T> randomValues, List<String> suggestions, boolean restoreDefaultsBeforeDiscard,
                                 boolean hideFromUserInput, boolean hideFromClient)
 {
     public SingleProperty(String identifier, T defaultVal, Class<T> type,
                           @NotNull InputHandle<T> inputHandle, @NotNull OutputHandle<T> outputHandle,
-                          @NotNull IPropertyValidator<T> propertyValidator,
-                          List<T> randomValues, List<String> suggestions,
+                          @NotNull IPropertyValidator<T> propertyValidator, IPostProcessHandle<T> postProcessHandle,
+                          List<T> randomValues, List<String> suggestions, boolean restoreDefaultsBeforeDiscard,
                           boolean hideFromUserInput, boolean hideFromClient)
     {
         this.identifier = identifier;
         this.defaultVal = defaultVal;
         this.type = type;
+
         this.inputHandle = inputHandle;
         this.outputHandle = outputHandle;
         this.propertyValidator = propertyValidator;
+
+        // Need to move this to another better place, as I don't want SingleProperty containing codes that can directly interact with PropertyHandler.
+        // But what else place should we move?
+        // - PropertyCollection is only for adding properties.
+        // - Adding to DisguiseProvider would just pollute them.
+        //
+        // Maybe the design of the Post Process Handle is bad, but I have no idea on how to make this better.
+        // Since we need to have a way to let players customize Happy Ghast Disguise's saddle. :(
+        this.postProcessHandle = postProcessHandle;
+
+        this.restoreDefaultsBeforeDiscard = restoreDefaultsBeforeDiscard;
         this.hideFromUserInput = hideFromUserInput;
         this.hideFromClient = hideFromClient;
 
@@ -48,10 +75,10 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         return outputHandle.handle(this.id(), value);
     }
 
-    public void validateInput(T value, Player player, EnumSet<ValidationFlag> validationFlags)
+    public void validateInput(T value, Entity player, EnumSet<ValidationSkipFlag> validationSkipFlags)
             throws PropertyValidationException
     {
-        this.propertyValidator.validate(value, player, validationFlags);
+        this.propertyValidator.validate(value, player, validationSkipFlags);
     }
 
     @Unmodifiable
@@ -96,6 +123,8 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
 
     public static class SinglePropertyBuilder<X>
     {
+        private static final IPostProcessHandle<Object> defaultPostProcessHandle = (a, b) -> {};
+
         private final String identifier;
         private final X defaultVal;
         private final Class<X> type;
@@ -104,6 +133,8 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
         private IPropertyValidator<X> validator = PropertyValidations::noOp;
         private boolean hideFromUserInput = false;
         private boolean hideFromClient = false;
+        private IPostProcessHandle<X> postProcessHandle = (IPostProcessHandle<X>) defaultPostProcessHandle;
+        private boolean restoreDefaultsBeforeDiscard = true;
 
         public SinglePropertyBuilder(String identifier, Class<X> type, X defaultVal)
         {
@@ -134,6 +165,12 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
             return this;
         }
 
+        public SinglePropertyBuilder<X> withPostProcess(IPostProcessHandle<X> postProcessHandle)
+        {
+            this.postProcessHandle = postProcessHandle;
+            return this;
+        }
+
         /**
          * Whether this property should not be visible for player input.
          * @apiNote This flag doesn't prevent this property from being parsed, to achieve that, use {@link InputHandles#immediateException(String, String)} as the input handle
@@ -149,7 +186,7 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
          * <br>
          * Properties with this flag would not get synced to clients via plugin message.
          *
-         * @see PropertyHandler#toNetworkProperties()
+         * @see PropertyHandler#serializeNonTempProperties()
          */
         public SinglePropertyBuilder<X> hideFromClient(boolean hideFromClient)
         {
@@ -186,12 +223,18 @@ public record SingleProperty<T>(String identifier, T defaultVal, Class<T> type, 
             return this;
         }
 
+        public SinglePropertyBuilder<X> restoreDefaultsBeforeDiscard(boolean v)
+        {
+            this.restoreDefaultsBeforeDiscard = v;
+            return this;
+        }
+
         public SingleProperty<X> build()
         {
             return new SingleProperty<>(this.identifier, this.defaultVal, this.type,
                     inputHandle, outputHandle,
-                    validator,
-                    randomValues, suggestions,
+                    validator, postProcessHandle,
+                    randomValues, suggestions, restoreDefaultsBeforeDiscard,
                     hideFromUserInput, hideFromClient);
         }
     }

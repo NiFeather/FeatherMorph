@@ -3,6 +3,8 @@ package xyz.nifeather.morph.backends.server;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -16,7 +18,6 @@ import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
-import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.DisguiseState;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
@@ -114,6 +115,15 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
+    public <X> void discardProperty(SingleProperty<X> property)
+    {
+        disguiseProperties.remove(property);
+
+        if (bindingWatcher == null) return;
+        bindingWatcher.discardProperty(property);
+    }
+
+    @Override
     public <X> @NotNull X readProperty(SingleProperty<X> property)
     {
         return this.readPropertyOr(property, property.defaultVal());
@@ -188,6 +198,20 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         bindingWatcher.writeEntry(CustomEntries.ATTACK_ANIMATION, true);
     }
 
+    @Override
+    public void playEntityAnimation(String animateName)
+    {
+        if (bindingWatcher != null)
+            bindingWatcher.playEntityAnimation(animateName);
+    }
+
+    @Override
+    public void updateEntityAnimateMask(String animateName, boolean isAllowed)
+    {
+        if (bindingWatcher != null)
+            bindingWatcher.updateEntityAnimateMaskStatus(animateName, isAllowed);
+    }
+
     private Player bindingPlayer;
 
     public Player getBindingPlayer()
@@ -221,6 +245,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
 
     private void refreshRegistry(@NotNull SingleWatcher bindingWatcher)
     {
+        cachedAttributes.forEach(bindingWatcher::writeEntityAttribute);
         this.disguiseProperties.forEach((property, value) -> applyProperty((SingleProperty<Object>) property, value));
 
         if (getEntityType() == EntityType.PLAYER)
@@ -235,13 +260,6 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
     }
 
     @Override
-    public void playAnimation(String animationId)
-    {
-        if (bindingWatcher != null)
-            bindingWatcher.writeEntry(CustomEntries.ANIMATION, animationId);
-    }
-
-    @Override
     public void onPlayerJoin(Player newInstance)
     {
         if (bindingWatcher == null)
@@ -250,7 +268,19 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         this.bindingWatcher.writeEntry(CustomEntries.SPAWN_ID, newInstance.getEntityId());
         this.bindingPlayer = newInstance;
 
-        if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
-            bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);
+        //todo: revisit to check if this is still required
+        //if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
+        //    bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);
+    }
+
+    private final Map<NamespacedKey, AttributeInstance> cachedAttributes = new ConcurrentHashMap<>();
+
+    @Override
+    public void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    {
+        cachedAttributes.put(id, attribute);
+        if (bindingWatcher == null) return;
+
+        bindingWatcher.writeEntityAttribute(id, attribute);
     }
 }

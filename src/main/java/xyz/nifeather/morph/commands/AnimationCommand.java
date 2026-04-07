@@ -124,18 +124,18 @@ public class AnimationCommand extends MorphPluginObject implements IConvertibleB
                 .getAnimationProvider()
                 .getAnimationSetFor(state.getDisguiseIdentifier());
 
-        String animationId = StringArgumentType.getString(context, "action");
+        String actionName = StringArgumentType.getString(context, "action");
 
         var animations = animationSet.getAvailableAnimationsForClient();
 
-        if (!animations.contains(animationId))
+        if (!animations.contains(actionName))
         {
             MessageUtils.send(player, CommandStrings.noSuchAnimation());
             return Command.SINGLE_SUCCESS;
         }
 
-        var sequencePair = animationSet.sequenceOf(animationId);
-        if (!state.tryScheduleSequence(animationId, sequencePair.left(), sequencePair.right()))
+        var action = animationSet.getAction(actionName);
+        if (!state.tryScheduleAction(actionName, action))
             MessageUtils.send(player, EmoteStrings.notAvailable());
 
         return Command.SINGLE_SUCCESS;

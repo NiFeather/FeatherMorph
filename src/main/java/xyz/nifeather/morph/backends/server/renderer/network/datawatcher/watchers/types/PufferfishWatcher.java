@@ -1,14 +1,12 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.PufferfishValues;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
-import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
-import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PufferfishPropertyCollection;
 
 public class PufferfishWatcher extends LivingEntityWatcher
 {
@@ -26,37 +24,22 @@ public class PufferfishWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.onEntryWrite(entry, oldVal, newVal);
+        super.onPropertyWrite(property, value);
 
-        if (entry.equals(CustomEntries.ANIMATION))
+        if (property.id().equals(PropertyNames.PUFFERFISH_PUFF_STATE))
         {
-            var animId = newVal.toString();
-            var world = getBindingPlayer().getWorld();
+            var state = (PufferfishPropertyCollection.PufferfishState) value;
 
-            var lastState = this.readOr(ValueIndex.PUFFERFISH.PUFF_STATE, 0);
-            switch (animId)
+            int peState = switch (state)
             {
-                case AnimationNames.INFLATE ->
-                {
-                    this.writePersistent(ValueIndex.PUFFERFISH.PUFF_STATE, PufferfishValues.PuffStates.LARGE);
+                case SMALL -> PufferfishValues.PuffStates.SMALL;
+                case MID -> PufferfishValues.PuffStates.MID;
+                case LARGE -> PufferfishValues.PuffStates.LARGE;
+            };
 
-                    if (lastState != PufferfishValues.PuffStates.LARGE)
-                        world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_PUFFER_FISH_BLOW_UP, SoundCategory.HOSTILE, 1, 1);
-                }
-                case AnimationNames.DEFLATE ->
-                {
-                    this.writePersistent(ValueIndex.PUFFERFISH.PUFF_STATE, PufferfishValues.PuffStates.SMALL);
-
-                    if (lastState != PufferfishValues.PuffStates.SMALL)
-                        world.playSound(getBindingPlayer().getLocation(), Sound.ENTITY_PUFFER_FISH_BLOW_OUT, SoundCategory.HOSTILE, 1, 1);
-                }
-                case AnimationNames.RESET ->
-                {
-                    this.writePersistent(ValueIndex.PUFFERFISH.PUFF_STATE, PufferfishValues.PuffStates.SMALL);
-                }
-            }
+            this.writePersistent(ValueIndex.PUFFERFISH.PUFF_STATE, peState);
         }
     }
 }

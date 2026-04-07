@@ -6,31 +6,33 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.AllayPropertyCollection;
 
 public class AllayWatcher extends LivingEntityWatcher
 {
+    private AllayPropertyCollection properties;
+
     @Override
     protected void initRegistry()
     {
         super.initRegistry();
 
         register(ValueIndex.ALLAY);
+        this.properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(AllayPropertyCollection.class);
     }
 
     @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.onEntryWrite(entry, oldVal, newVal);
+        super.onPropertyWrite(property, value);
 
-        if (entry.equals(CustomEntries.ANIMATION))
+        if (property.id().equals(PropertyNames.ALLAY_DANCING))
         {
-            var id = newVal.toString();
-
-            switch (id)
-            {
-                case AnimationNames.DANCE_START -> writePersistent(ValueIndex.ALLAY.DANCING, true);
-                case AnimationNames.STOP, AnimationNames.RESET -> writePersistent(ValueIndex.ALLAY.DANCING, false);
-            }
+            var dancing = (Boolean) value;
+            this.writePersistent(ValueIndex.ALLAY.DANCING, dancing);
         }
     }
 

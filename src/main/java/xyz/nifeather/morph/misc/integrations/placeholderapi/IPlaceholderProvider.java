@@ -1,5 +1,6 @@
 package xyz.nifeather.morph.misc.integrations.placeholderapi;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,5 +22,5 @@ public interface IPlaceholderProvider
      * @return 内容，为null则会自动返回"???"
      */
     @Nullable
-    public String resolvePlaceholder(Player player, String params);
+    public String resolvePlaceholder(OfflinePlayer player, String params);
 }

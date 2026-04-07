@@ -34,6 +34,7 @@ public class CustomEntries
 
     public static final CustomEntry<Integer> SLIME_SIZE_REAL = CustomEntry.of("slime_size_real", 0);
 
+    @Deprecated(forRemoval = true)
     public static final CustomEntry<String> ANIMATION = CustomEntry.of("animation", "morph:unknown");
 
     public static final CustomEntry<UUID> SPAWN_UUID = CustomEntry.of("spawn_uuid", Uuids.NIL_UUID);

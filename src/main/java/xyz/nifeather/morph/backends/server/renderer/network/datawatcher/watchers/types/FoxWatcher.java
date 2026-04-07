@@ -9,6 +9,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.FoxPropertyCollection;
 
@@ -30,34 +31,30 @@ public class FoxWatcher extends AgeableMobWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(FoxPropertyCollection.class);
-
-        if (property.equals(properties.VARIANT))
+        switch (property.id())
         {
-            var val = (Fox.Type) value;
+            case PropertyNames.FOX_VARIANT ->
+            {
+                var val = (Fox.Type) value;
 
-            this.writePersistent(ValueIndex.FOX.FOX_VARIANT, val.ordinal());
+                this.writePersistent(ValueIndex.FOX.FOX_VARIANT, val.ordinal());
+            }
+
+            case PropertyNames.FOX_STATUS ->
+            {
+                var status = (FoxPropertyCollection.FoxStatus) value;
+                var flag = switch (status)
+                {
+                    case STANDING -> 0x00;
+                    case SITTING -> 0x01;
+                    case SLEEPING -> 0x20;
+                };
+
+                this.writePersistent(ValueIndex.FOX.FLAGS, (byte)flag);
+            }
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
-    {
-        super.onEntryWrite(entry, oldVal, newVal);
-
-        if (entry.equals(CustomEntries.ANIMATION))
-        {
-            var animId = newVal.toString();
-
-            switch (animId)
-            {
-                case AnimationNames.SLEEP -> this.writePersistent(ValueIndex.FOX.FLAGS, (byte)0x20);
-                case AnimationNames.SIT -> this.writePersistent(ValueIndex.FOX.FLAGS, (byte)0x01);
-                case AnimationNames.STANDUP, AnimationNames.RESET -> this.writePersistent(ValueIndex.FOX.FLAGS, (byte)0);
-            }
-        }
     }
 
     @Override

@@ -51,7 +51,7 @@ public class WorkaroundProcessor extends MorphPluginObject implements Listener
         if (playerDisguiseState != null)
         {
             if (playerDisguiseState.getEntityType() == EntityType.PLAYER)
-                playerDisguiseState.stopAnimations();
+                playerDisguiseState.stopActions();
         }
 
         // Riding on a virtual Creaking would result in a bad state for game clients

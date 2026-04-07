@@ -51,7 +51,7 @@ public class MorphConfigManager extends PluginConfigManager
         registerUpdateMethods();
     }
 
-    public static final int TARGET_VERSION = 48;
+    public static final int TARGET_VERSION = 49;
 
     @SuppressWarnings("removal")
     private void registerUpdateMethods()

@@ -103,6 +103,9 @@ public class WatcherIndex
 
         setTypeWatcher(EntityType.NAUTILUS, NautilusWatcher::new);
         setTypeWatcher(EntityType.ZOMBIE_NAUTILUS, ZombieNautilusWatcher::new);
+
+        setTypeWatcher(EntityType.ITEM_DISPLAY, ItemDisplayWatcher::new);
+        setTypeWatcher(EntityType.TEXT_DISPLAY, TextDisplayWatcher::new);
     }
 
     private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)
@@ -117,7 +120,7 @@ public class WatcherIndex
         var watcherFunc = typeWatcherMap.getOrDefault(entityType, null);
 
         if (watcherFunc == null)
-            return new LivingEntityWatcher(bindingPlayer, entityType);
+            return entityType.isAlive() ? new LivingEntityWatcher(bindingPlayer, entityType) : new EntityWatcher(bindingPlayer, entityType);
 
         return watcherFunc.apply(bindingPlayer);
     }
