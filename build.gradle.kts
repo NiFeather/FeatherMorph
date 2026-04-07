@@ -11,8 +11,8 @@ plugins {
     java
     `maven-publish`
     id("net.minecrell.plugin-yml.paper") version "0.6.0" // Generates plugin.yml
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
-    id("xyz.jpenilla.run-paper") version "3.0.0" // Adds runServer and runMojangMappedServer tasks for testing
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
+    id("xyz.jpenilla.run-paper") version "3.0.2" // Adds runServer and runMojangMappedServer tasks for testing
     id("com.gradleup.shadow") version "9.1.0" // Shadow PluginBase
 }
 
@@ -161,7 +161,7 @@ dependencies {
 group = "xyz.nifeather.morph"
 version = "${project.property("project_version")}"
 description = "Yet another disguise plugin, that introduces the morph feature to the server, similar to the MetaMorph mod"
-java.sourceCompatibility = JavaVersion.VERSION_21
+java.sourceCompatibility = JavaVersion.VERSION_25
 
 paper {
     load = BukkitPluginDescription.PluginLoadOrder.POSTWORLD
@@ -313,7 +313,7 @@ runPaper.folia.registerTask()
 tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
     javaLauncher = javaToolchains.launcherFor {
         vendor = JvmVendorSpec.JETBRAINS
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 
     jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-Dbstats.relocatecheck=false")

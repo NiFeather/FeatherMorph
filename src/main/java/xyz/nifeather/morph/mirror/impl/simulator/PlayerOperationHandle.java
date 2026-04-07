@@ -169,7 +169,7 @@ public class PlayerOperationHandle extends MorphPluginObject implements IOperati
 
             var craftBlock = ((CraftBlock) targetBlock);
             if (canBreak.predicates.stream()
-                    .noneMatch(bp -> bp.matches(craftBlock.getHandle().getMinecraftWorld(), craftBlock.getPosition())))
+                    .noneMatch(bp -> bp.matches(craftBlock.getCraftWorld().getHandle(), craftBlock.getPosition())))
             {
                 return SimulateResult.success(EquipmentSlot.HAND);
             }
@@ -444,11 +444,11 @@ public class PlayerOperationHandle extends MorphPluginObject implements IOperati
             var entityHandle = record.nmsEntity();
             var manager = record.interactManager();
 
-            var vec = new Vec3(hitPos.getX(), hitPos.getY(), hitPos.getZ());
+            var hitPositionAsNMSVec3 = new Vec3(hitPos.getX(), hitPos.getY(), hitPos.getZ());
 
             assert entityHandle != null;
-            return entityHandle.interactAt(playerHandle, vec, hand).consumesAction()
-                    || playerHandle.interactOn(entityHandle, hand).consumesAction()
+            return entityHandle.interact(playerHandle, hand, hitPositionAsNMSVec3).consumesAction()
+                    || playerHandle.interactOn(entityHandle, hand, hitPositionAsNMSVec3).consumesAction()
                     || manager.useItem(playerHandle, worldHandle, CraftItemStack.asNMSCopy(bukkitItem), hand).consumesAction();
         }
 

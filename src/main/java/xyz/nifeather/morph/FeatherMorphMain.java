@@ -191,8 +191,8 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
         pluginManager = Bukkit.getPluginManager();
         var bukkitVersion = Bukkit.getMinecraftVersion();
 
-        String primaryVersion = "1.21.11";
-        String[] compatVersions = new String[] { primaryVersion, "1.21.11 Release Candidate 3" };
+        String primaryVersion = "26.1.1";
+        String[] compatVersions = new String[] { primaryVersion, "26.1" };
         if (Arrays.stream(compatVersions).noneMatch(bukkitVersion::equals))
         {
             printImportantWarning(
@@ -201,8 +201,15 @@ public final class FeatherMorphMain extends XiaMoJavaPlugin
                     "Please use %s instead!".formatted(primaryVersion)
             );
 
-            panic("This version of Minecraft is not supported.");
-            return;
+            if (!Boolean.getBoolean("FEATHERMORPH_SKIP_VERSION_PANIC"))
+            {
+                panic("This version of Minecraft is not supported.");
+                return;
+            }
+            else
+            {
+                logger.info("FEATHERMORPH_SKIP_VERSION_PANIC is present, skipping panic...");
+            }
         }
 
         if (!bukkitVersion.equals(primaryVersion))

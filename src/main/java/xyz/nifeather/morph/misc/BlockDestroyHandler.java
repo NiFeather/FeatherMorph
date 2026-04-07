@@ -162,7 +162,7 @@ public class BlockDestroyHandler
 
         if (block != null)
         {
-            this.nmsBlock = ((CraftBlock) block).getNMS();
+            this.nmsBlock = ((CraftBlock) block).getBlockState();
             this.nmsWorld = ((CraftWorld) block.getWorld()).getHandle();
         }
 
