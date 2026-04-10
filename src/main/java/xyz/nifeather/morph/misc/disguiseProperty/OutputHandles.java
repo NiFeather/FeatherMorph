@@ -15,6 +15,7 @@ import net.kyori.adventure.text.serializer.json.JSONOptions;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Brightness;
+import net.minecraft.util.LightCoordsUtil;
 import org.bukkit.Color;
 import org.bukkit.Keyed;
 import org.bukkit.inventory.EquipmentSlot;
@@ -119,8 +120,8 @@ public class OutputHandles
 
     public static String writeLight(String propertyName, int light)
     {
-        int block = Brightness.block(light);
-        int sky = Brightness.sky(light);
+        int block = LightCoordsUtil.block(light);
+        int sky = LightCoordsUtil.sky(light);
 
         var list = List.of(block, sky);
 

@@ -21,6 +21,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.Brightness;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.StringUtil;
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -608,7 +609,7 @@ public class InputHandles
             }
         }
 
-        int light = Brightness.pack(block, sky);
+        int light = LightCoordsUtil.pack(block, sky);
 
         return Optional.of(light);
     }
