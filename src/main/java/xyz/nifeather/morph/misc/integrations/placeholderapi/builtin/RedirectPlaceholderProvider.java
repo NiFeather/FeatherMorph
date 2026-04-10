@@ -11,6 +11,7 @@ import xyz.nifeather.morph.misc.DisguiseTypes;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.IPlaceholderProvider;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class RedirectPlaceholderProvider extends MorphPluginObject implements IPlaceholderProvider
 {
@@ -25,6 +26,16 @@ public class RedirectPlaceholderProvider extends MorphPluginObject implements IP
         return "redirect";
     }
 
+    protected @Nullable String stringIfNotDisguised(OfflinePlayer player, String placeholder)
+    {
+        return defaultString(player, placeholder);
+    }
+
+    protected @Nullable String defaultString(OfflinePlayer player, String placeholder)
+    {
+        return PlaceholderAPI.setPlaceholders(player, placeholder);
+    }
+
     /**
      * 解析Placeholder
      *
@@ -35,25 +46,25 @@ public class RedirectPlaceholderProvider extends MorphPluginObject implements IP
     @Override
     public @Nullable String resolvePlaceholder(OfflinePlayer player, String params)
     {
-        var placeholder = "%%%s%%".formatted(params.replaceFirst("redirect", ""));
+        var placeholder = "%%%s%%".formatted(params.replaceFirst(getPlaceholderIdentifier(), ""));
         var api = Objects.requireNonNull(FeatherMorphAPI.instance());
 
         // Not disguised, return player itself's result
         var state = api.directAccess().morphManager().getDisguiseStateFor(player.getUniqueId());
         if (state == null)
-            return PlaceholderAPI.setPlaceholders(player, placeholder);
+            return stringIfNotDisguised(player, placeholder);
 
         // Not disguising as player, return player itself's result
         var type = state.getDisguiseType();
         if (type != DisguiseTypes.PLAYER)
-            return PlaceholderAPI.setPlaceholders(player, placeholder);
+            return defaultString(player, placeholder);
 
         var disguiseTarget = type.toStrippedId(state.getDisguiseIdentifier());
 
         // Disguising as a player that the server don't know, return empty
         var offlinePlayerIfExists = Bukkit.getOfflinePlayerIfCached(disguiseTarget);
         if (offlinePlayerIfExists == null)
-            return PlaceholderAPI.setPlaceholders(player, placeholder);
+            return defaultString(player, placeholder);
 
         return PlaceholderAPI.setPlaceholders(offlinePlayerIfExists, placeholder);
     }

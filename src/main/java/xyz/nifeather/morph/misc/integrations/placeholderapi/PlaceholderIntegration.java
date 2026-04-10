@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xiamomc.pluginbase.Managers.DependencyManager;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.AvaliableDisguisesProvider;
+import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.RedirectOrEmptyPlaceholderProvider;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.RedirectPlaceholderProvider;
 import xyz.nifeather.morph.misc.integrations.placeholderapi.builtin.StateNameProvider;
 
@@ -25,7 +26,8 @@ public class PlaceholderIntegration extends PlaceholderExpansion
         addPlaceholders(ObjectArrayList.of(
                 new StateNameProvider(),
                 new AvaliableDisguisesProvider(),
-                new RedirectPlaceholderProvider()
+                new RedirectPlaceholderProvider(),
+                new RedirectOrEmptyPlaceholderProvider()
         ));
     }
 
@@ -44,7 +46,7 @@ public class PlaceholderIntegration extends PlaceholderExpansion
     @Override
     public @NotNull String getVersion()
     {
-        return "1.5.0";
+        return "2.10.0";
     }
 
     @Override
