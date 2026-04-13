@@ -39,7 +39,7 @@ public record NmsRecord(ServerPlayer nmsPlayer, ServerLevel nmsWorld,
 
     public static LivingEntity ofLiving(org.bukkit.entity.LivingEntity bukkitLiving)
     {
-        return ((CraftLivingEntity) bukkitLiving).getHandle();
+        return (LivingEntity) ((CraftLivingEntity) bukkitLiving).getHandleRaw();
     }
 
     public static NmsRecord of(Player player, @Nullable Entity targetEntity)

@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.player.User;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -28,7 +29,7 @@ public class PlayerLookPacketListener extends ProtocolListener
             {
                 var wrapper = new WrapperPlayServerEntityPositionSync(event);
                 var data = wrapper.getValues();
-                var rec = this.getConvertedYawPitch(wrapper.getId(), data.getYaw(), data.getPitch());
+                var rec = this.getConvertedYawPitch(wrapper.getId(), event.getUser(), data.getYaw(), data.getPitch());
 
                 if (rec == null)
                     return;
@@ -40,7 +41,7 @@ public class PlayerLookPacketListener extends ProtocolListener
             case PacketType.Play.Server.ENTITY_HEAD_LOOK ->
             {
                 var wrapper = new WrapperPlayServerEntityHeadLook(event);
-                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), wrapper.getHeadYaw(), 0f);
+                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), event.getUser(), wrapper.getHeadYaw(), 0f);
 
                 if (rec == null)
                     return;
@@ -52,7 +53,7 @@ public class PlayerLookPacketListener extends ProtocolListener
             case PacketType.Play.Server.ENTITY_ROTATION ->
             {
                 var wrapper = new WrapperPlayServerEntityRotation(event);
-                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), wrapper.getYaw(), wrapper.getPitch());
+                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), event.getUser(), wrapper.getYaw(), wrapper.getPitch());
 
                 if (rec == null) return;
 
@@ -64,7 +65,7 @@ public class PlayerLookPacketListener extends ProtocolListener
             case PacketType.Play.Server.ENTITY_RELATIVE_MOVE_AND_ROTATION ->
             {
                 var wrapper = new WrapperPlayServerEntityRelativeMoveAndRotation(event);
-                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), wrapper.getYaw(), wrapper.getPitch());
+                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), event.getUser(), wrapper.getYaw(), wrapper.getPitch());
 
                 if (rec == null) return;
 
@@ -76,7 +77,7 @@ public class PlayerLookPacketListener extends ProtocolListener
             case PacketType.Play.Server.ENTITY_TELEPORT ->
             {
                 var wrapper = new WrapperPlayServerEntityTeleport(event);
-                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), wrapper.getYaw(), wrapper.getPitch());
+                var rec = this.getConvertedYawPitch(wrapper.getEntityId(), event.getUser(), wrapper.getYaw(), wrapper.getPitch());
 
                 if (rec == null) return;
 
@@ -97,10 +98,10 @@ public class PlayerLookPacketListener extends ProtocolListener
     }
 
     @Nullable
-    private YawPitchRec getConvertedYawPitch(int entityId, float rawYaw, float rawPitch)
+    private YawPitchRec getConvertedYawPitch(int entityId, User viewingUser, float rawYaw, float rawPitch)
     {
         //获取此包的来源实体
-        var sourcePlayer = getPlayerFrom(entityId);
+        var sourcePlayer = getEntityFrom(entityId, viewingUser);
         if (sourcePlayer == null)
             return null;
 

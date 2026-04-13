@@ -49,7 +49,7 @@ public class ChickenPropertyCollection extends BaseLivingEntityPropertyCollectio
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Chicken chicken)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Chicken chicken)
     {
         super.setupPropertiesFromEntity(propertyHandler, chicken);
 

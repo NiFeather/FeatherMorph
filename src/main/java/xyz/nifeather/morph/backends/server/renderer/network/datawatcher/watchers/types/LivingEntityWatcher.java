@@ -11,26 +11,22 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import org.bukkit.Color;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
-import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
-import xyz.nifeather.morph.utilities.NmsUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,9 +34,9 @@ import java.util.UUID;
 
 public class LivingEntityWatcher extends EntityWatcher
 {
-    public LivingEntityWatcher(Player bindingPlayer, EntityType entityType)
+    public LivingEntityWatcher(IBindTarget bindTarget, EntityType entityType)
     {
-        super(bindingPlayer, entityType);
+        super(bindTarget, entityType);
     }
 
     @Override
@@ -51,15 +47,15 @@ public class LivingEntityWatcher extends EntityWatcher
         register(ValueIndex.BASE_LIVING);
     }
 
-    private final Pair<Player, EquipmentSlot> handPair = new ObjectObjectMutablePair<>(null, null);
+    private final Pair<Player, EquipmentSlot> itemConsumingPair = new ObjectObjectMutablePair<>(null, null);
 
     public void onPlayerStartUsingItem(PlayerInteractEvent e)
     {
-        if (!this.isPlayerOnline()) return;
-        if (!this.getBindingPlayer().equals(e.getPlayer())) return;
+        if (!this.isActive()) return;
+        if (!bindTarget.equals(e.getPlayer())) return;
 
-        handPair.left(e.getPlayer());
-        handPair.right(e.getHand());
+        itemConsumingPair.left(e.getPlayer());
+        itemConsumingPair.right(e.getHand());
     }
 
     @Override
@@ -115,42 +111,21 @@ public class LivingEntityWatcher extends EntityWatcher
 
     protected WrapperPlayServerUpdateAttributes buildAttributePacket()
     {
-        var player = getBindingPlayer();
         List<WrapperPlayServerUpdateAttributes.Property> attributeProperties = new ObjectArrayList<>();
 
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-
-        List<AttributeInstance> attributes = getEntityType() == EntityType.PLAYER
-                ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
-                : NmsUtils.getValidAttributes(getEntityType(), nmsPlayer.getAttributes());
-
-        attributes.forEach(instance ->
+        bindTarget.syncableAttributes().forEach(instance ->
         {
-            // Still NMS :(
-            var nmsAttribute = BuiltInRegistries.ATTRIBUTE.getKey(instance.getAttribute().value());
-            if (nmsAttribute == null)
-            {
-                logger.warn("Unknown attribute from bukkit to NMS: " + instance.getAttribute().value());
-                return;
-            }
-
-            String id = nmsAttribute.toString();
-
+            String id = instance.getAttribute().key().asString();
             var packetAttribute = Attributes.getByName(id);
-            if (packetAttribute == null)
-            {
-                logger.warn("Unknown attribute for packet: " + id);
-                return;
-            }
 
             List<WrapperPlayServerUpdateAttributes.PropertyModifier> modifiers = new ObjectArrayList<>();
-            for (AttributeModifier modifier : instance.getModifiers())
+            for (var modifier : instance.getModifiers())
             {
                 var packetModifier = new WrapperPlayServerUpdateAttributes.PropertyModifier(
-                        new ResourceLocation(modifier.id().toString()),
+                        new ResourceLocation(modifier.key().asString()),
                         UUID.randomUUID(),
-                        modifier.amount(),
-                        fromNMSAttributeOperation(modifier.operation())
+                        modifier.getAmount(),
+                        fromBukkitAttributeOperation(modifier.getOperation())
                 );
 
                 modifiers.add(packetModifier);
@@ -160,24 +135,24 @@ public class LivingEntityWatcher extends EntityWatcher
             attributeProperties.add(property);
         });
 
-        return new WrapperPlayServerUpdateAttributes(player.getEntityId(), attributeProperties);
+        return new WrapperPlayServerUpdateAttributes(this.readEntryOrThrow(CustomEntries.SPAWN_ID), attributeProperties);
     }
 
-    protected WrapperPlayServerUpdateAttributes.PropertyModifier.Operation fromNMSAttributeOperation(AttributeModifier.Operation nmsOperation)
+    protected WrapperPlayServerUpdateAttributes.PropertyModifier.Operation fromBukkitAttributeOperation(AttributeModifier.Operation nmsOperation)
     {
         return switch (nmsOperation)
         {
-            case ADD_VALUE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.ADDITION;
-            case ADD_MULTIPLIED_BASE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_BASE;
-            case ADD_MULTIPLIED_TOTAL -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_TOTAL;
+            case ADD_NUMBER -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.ADDITION;
+            case ADD_SCALAR -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_BASE;
+            case MULTIPLY_SCALAR_1 -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_TOTAL;
         };
     }
 
     @Override
-    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
+    protected List<PacketWrapper<?>> doBuildSpawnPackets() throws BuildFailedException
     {
         var packets = new ObjectArrayList<PacketWrapper<?>>();
-        var entityPackets = super.buildSpawnPackets();
+        var entityPackets = super.doBuildSpawnPackets();
 
         packets.addAll(entityPackets);
         packets.add(buildAttributePacket());
@@ -190,38 +165,15 @@ public class LivingEntityWatcher extends EntityWatcher
     {
         super.doSync();
 
-        var player = getBindingPlayer();
-        var nmsPlayer = NmsRecord.ofPlayer(player);
         var values = ValueIndex.BASE_LIVING;
 
-        writeTemp(values.HEALTH, (float)player.getHealth());
+        writeTemp(values.HEALTH, bindTarget.health());
 
-        var flagBit = 0x00;
-
-        if (nmsPlayer.isUsingItem())
-        {
-            flagBit |= 0x01;
-
-            var handInUse = handPair.right();
-
-            if (handInUse == null)
-            {
-                var nmsHand = nmsPlayer.getUsedItemHand();
-                handInUse = nmsHand == InteractionHand.MAIN_HAND ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
-            }
-
-            boolean isOffhand = handInUse == EquipmentSlot.OFF_HAND;
-            if (isOffhand) flagBit |= 0x02;
-        }
-
-        if (player.isRiptiding())
-            flagBit |= 0x04;
-
-        writeTemp(values.LIVING_FLAGS, (byte)flagBit);
+        writeTemp(values.LIVING_FLAGS, bindTarget.livingEntityFlags());
 
         List<Color> colors = new ObjectArrayList<>();
         boolean hasAmbient = false;
-        for (PotionEffect effect : player.getActivePotionEffects())
+        for (PotionEffect effect : bindTarget.activePotionEffects())
         {
             if (effect.hasParticles())
                 colors.add(effect.getType().getColor());
@@ -236,18 +188,17 @@ public class LivingEntityWatcher extends EntityWatcher
         writeTemp(values.POTION_COLOR, colorList);
         writeTemp(values.POTION_ISAMBIENT, hasAmbient);
 
-        writeTemp(values.STUCKED_ARROWS, player.getArrowsInBody());
-        writeTemp(values.BEE_STINGERS, player.getBeeStingersInBody());
+        writeTemp(values.STUCKED_ARROWS, bindTarget.arrowsInBody());
+        writeTemp(values.BEE_STINGERS, bindTarget.beeStingersInBody());
 
-        Optional<Vector3i> bedPos = Optional.empty();
-        if (player.isSleeping())
+        Optional<Vector3i> peBedPos = Optional.empty();
+        var sleepingPos = bindTarget.sleepingPos();
+        if (sleepingPos.isPresent())
         {
-            var bukkitPos = player.getBedLocation();
-            bedPos = Optional.of(
-                    new Vector3i(bukkitPos.blockX(), bukkitPos.blockY(), bukkitPos.blockZ())
-            );
+            var pos = sleepingPos.get();
+            peBedPos = Optional.of(new Vector3i(pos.x(), pos.y(), pos.z()));
         }
 
-        writeTemp(values.BED_POS, bedPos);
+        writeTemp(values.BED_POS, peBedPos);
     }
 }

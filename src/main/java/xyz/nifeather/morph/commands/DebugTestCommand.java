@@ -10,10 +10,15 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mannequin;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Annotations.Resolved;
@@ -21,17 +26,26 @@ import xiamomc.pluginbase.Messages.FormattableMessage;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphManager;
 import xyz.nifeather.morph.api.FeatherMorphAPI;
+import xyz.nifeather.morph.backends.server.ServerBackend;
+import xyz.nifeather.morph.backends.server.ServerDisguiseWrapper;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.AbstractValues;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SingleValue;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.commands.brigadier.BrigadierCommand;
+import xyz.nifeather.morph.commands.brigadier.arguments.DisguiseIdentifierArgumentType;
+import xyz.nifeather.morph.misc.ExecutionErrorException;
+import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
+import xyz.nifeather.morph.misc.disguiseProperty.values.OffTreeProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.values.PlayerPropertyCollection;
 import xyz.nifeather.morph.storage.skill.SkillAbilityConfigContainer;
 import xyz.nifeather.morph.storage.skill.SkillsConfigurationStoreNew;
+import xyz.nifeather.morph.utilities.GameProfileUtils;
+import xyz.nifeather.morph.utilities.NbtUtils;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -136,7 +150,71 @@ public class DebugTestCommand extends BrigadierCommand
                         ).build()
         );
 
+        dispatcher.register(
+                Commands.literal("disguise_entity")
+                        .then(
+                                Commands.argument("entity", ArgumentTypes.entity())
+                                        .executes(this::disguiseEntity)
+                        ).build()
+        );
+
         return true;
+    }
+
+    private int disguiseEntity(CommandContext<CommandSourceStack> context) throws CommandSyntaxException
+    {
+        var entity = context.getArgument("entity", EntitySelectorArgumentResolver.class)
+                .resolve(context.getSource())
+                .getFirst();
+
+        if (!(entity instanceof LivingEntity living))
+            throw new RuntimeException();
+
+        var srbd = morphManager.getBackend("server", ServerBackend.class);
+        assert srbd != null;
+
+        if (srbd.isDisguised(entity))
+        {
+            Bukkit.broadcast(Component.text("Undisguise!"));
+            srbd.unDisguise(living);
+            Bukkit.broadcast(Component.text("Undisguise OK!"));
+            return 0;
+        }
+
+        var ownerSession = morphManager.getDisguiseStateFor(context.getSource().getExecutor());
+        if (ownerSession == null)
+        {
+            Bukkit.broadcast(Component.text("NOT DISGUISED!"));
+            return 222;
+        }
+
+        var instance = (ServerDisguiseWrapper)srbd.createInstance(ownerSession.getEntityType());
+
+        instance.writeProperty(OffTreeProperties.VIRTUAL_ENTITY_UUID, UUID.randomUUID());
+
+        ownerSession.disguisePropertyHandler().getAll().forEach((property, value) ->
+        {
+            if (property.id().equals("offtree/virtual_entity_uuid"))
+                return;
+
+            logger.info("Copy %s: %s".formatted(property.identifier(), value));
+
+            instance.writeProperty((SingleProperty<Object>) property, value);
+        });
+
+        logger.info("Watcher is " + instance.getBindingWatcher());
+
+        try
+        {
+            srbd.disguise(living, instance);
+            Bukkit.broadcast(Component.text("OK!"));
+        }
+        catch (ExecutionErrorException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        return 0;
     }
 
     private CompletableFuture<Suggestions> suggestValueIndex(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder)

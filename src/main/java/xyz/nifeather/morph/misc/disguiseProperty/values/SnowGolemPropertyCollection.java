@@ -26,7 +26,7 @@ public class SnowGolemPropertyCollection extends BaseLivingEntityPropertyCollect
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Snowman targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Snowman targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

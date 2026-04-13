@@ -49,7 +49,7 @@ public class ParrotPropertyCollection extends BaseLivingEntityPropertyCollection
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Parrot targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Parrot targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

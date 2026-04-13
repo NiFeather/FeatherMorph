@@ -54,7 +54,7 @@ public class MannequinPropertyCollection extends BaseLivingEntityPropertyCollect
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Mannequin targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Mannequin targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

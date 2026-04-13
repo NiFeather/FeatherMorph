@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -104,7 +105,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ModDisgu
         return ModDisguiseWrapper.fromExternal(other, this);
     }
 
-    private final Map<Player, ModDisguiseWrapper> playerFallbackWrapperMap = new Object2ObjectOpenHashMap<>();
+    private final Map<Entity, ModDisguiseWrapper> playerFallbackWrapperMap = new Object2ObjectOpenHashMap<>();
 
     @Resolved(shouldSolveImmediately = true)
     private ModNetworkingHelper modNetworkingHelper;
@@ -115,7 +116,7 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ModDisgu
     }
 
     @Override
-    public void disguise(Player player, DisguiseWrapper<?> rawWrapper) throws ExecutionErrorException
+    public void disguise(LivingEntity entity, DisguiseWrapper<?> rawWrapper) throws ExecutionErrorException
     {
         if (!(rawWrapper instanceof ModDisguiseWrapper wrapper))
         {
@@ -124,23 +125,23 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ModDisgu
                     .create();
         }
 
-        if (playerFallbackWrapperMap.containsKey(player))
-            unDisguise(player);
+        if (playerFallbackWrapperMap.containsKey(entity))
+            unDisguise(entity);
 
         //发送元数据
 
         var players = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayersNative());
-        players.remove(player);
-        var cmd = new S2CCRRegisterCommand(player.getEntityId(), wrapper.readPropertyOrThrow(WrapperProperties.DISGUISE_ID));
+        players.remove(entity);
+        var cmd = new S2CCRRegisterCommand(entity.getEntityId(), wrapper.readPropertyOrThrow(WrapperProperties.DISGUISE_ID));
         players.forEach(p -> clientHandler.sendCommand(p, cmd));
 
-        modNetworkingHelper.prepareMeta(player)
+        modNetworkingHelper.prepareMeta(entity)
                 .forWrapper(rawWrapper)
                 .send();
 
-        wrapper.setBindingPlayer(player);
+        wrapper.setBindingEntity(entity);
 
-        playerFallbackWrapperMap.put(player, wrapper);
+        playerFallbackWrapperMap.put(entity, wrapper);
     }
 
     public S2CCRSyncRegisterCommand generateRenderSyncCommand(MorphManager morphManager)
@@ -178,19 +179,19 @@ public class ModBackend extends DisguiseBackend<TrackingClientDisguise, ModDisgu
     private MorphClientHandler clientHandler;
 
     @Override
-    public boolean unDisguise(Player player)
+    public boolean unDisguise(LivingEntity entity)
     {
-        var wrapper = playerFallbackWrapperMap.getOrDefault(player, null);
+        var wrapper = playerFallbackWrapperMap.getOrDefault(entity, null);
 
         if (wrapper != null)
             wrapper.dispose();
 
-        var cmd = new S2CCRUnregisterCommand(player.getEntityId());
+        var cmd = new S2CCRUnregisterCommand(entity.getEntityId());
         var players = new ObjectArrayList<>(featherMorph().getPlatform().onlinePlayersNative());
-        players.remove(player);
+        players.removeIf(p -> p.equals(entity));
         players.forEach(p -> clientHandler.sendCommand(p, cmd));
 
-        playerFallbackWrapperMap.remove(player);
+        playerFallbackWrapperMap.remove(entity);
 
         return true;
     }

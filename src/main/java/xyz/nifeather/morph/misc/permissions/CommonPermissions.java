@@ -14,6 +14,7 @@ public class CommonPermissions
 
     public final static String MORPH = PERM_ROOT + "morph";
     public final static String UNMORPH = PERM_ROOT + "unmorph";
+    public final static String CLONE_DISGUISE = PERM_ROOT + "clone_morph";
 
     public final static String SKILL = PERM_ROOT + "skill";
     public final static String HEAD_MORPH = PERM_ROOT + "headmorph";

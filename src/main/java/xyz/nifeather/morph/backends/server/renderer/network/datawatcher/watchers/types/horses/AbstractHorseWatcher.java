@@ -1,7 +1,8 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.horses;
 
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 
@@ -15,9 +16,8 @@ public class AbstractHorseWatcher extends AgeableMobWatcher
         register(ValueIndex.ABSTRACT_HORSE);
     }
 
-    public AbstractHorseWatcher(Player bindingPlayer, EntityType entityType)
+    public AbstractHorseWatcher(IBindTarget bindTarget, EntityType entityType)
     {
-        super(bindingPlayer, entityType);
+        super(bindTarget, entityType);
     }
-
 }

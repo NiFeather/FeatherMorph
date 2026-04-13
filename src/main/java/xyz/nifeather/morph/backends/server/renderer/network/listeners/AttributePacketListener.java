@@ -29,7 +29,7 @@ public class AttributePacketListener extends ProtocolListener
 
         var wrapper = new WrapperPlayServerUpdateAttributes(event);
 
-        var sourcePlayer = getPlayerFrom(wrapper.getEntityId());
+        var sourcePlayer = getEntityFrom(wrapper.getEntityId(), event.getUser());
         if (sourcePlayer == null)
             return;
 

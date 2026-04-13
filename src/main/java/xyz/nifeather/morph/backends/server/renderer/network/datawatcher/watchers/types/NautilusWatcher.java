@@ -2,13 +2,14 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 
 public class NautilusWatcher extends AbstractNautilusWatcher
 {
-    public NautilusWatcher(Player bindingPlayer)
+    public NautilusWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.NAUTILUS);
+        super(bindTarget, EntityType.NAUTILUS);
     }
 
     @Override

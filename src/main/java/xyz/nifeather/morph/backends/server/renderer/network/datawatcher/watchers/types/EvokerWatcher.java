@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.EvokerValues;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
@@ -9,9 +10,9 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 
 public class EvokerWatcher extends LivingEntityWatcher
 {
-    public EvokerWatcher(Player bindingPlayer)
+    public EvokerWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.EVOKER);
+        super(bindTarget, EntityType.EVOKER);
     }
 
     @Override

@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -9,9 +10,9 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.GuardianPropertyCollecti
 
 public class GuardianWatcher extends LivingEntityWatcher
 {
-    public GuardianWatcher(Player bindingPlayer)
+    public GuardianWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.GUARDIAN);
+        super(bindTarget, EntityType.GUARDIAN);
     }
 
     @Override

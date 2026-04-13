@@ -9,6 +9,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -21,9 +22,9 @@ import java.util.Objects;
 
 public class FrogWatcher extends LivingEntityWatcher
 {
-    public FrogWatcher(Player bindingPlayer)
+    public FrogWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.FROG);
+        super(bindTarget, EntityType.FROG);
     }
 
     private FrogVariant getFrogVariant(NamespacedKey key)
@@ -62,15 +63,15 @@ public class FrogWatcher extends LivingEntityWatcher
         if (entry.equals(CustomEntries.ANIMATION))
         {
             var animId = newVal.toString();
-            var player = getBindingPlayer();
-            var world = player.getWorld();
+            var location = location();
+            var world = location.getWorld();
 
             switch (animId)
             {
                 case AnimationNames.EAT ->
                 {
                     this.writePersistent(ValueIndex.FROG.POSE, EntityPose.USING_TONGUE);
-                    world.playSound(player.getLocation(), Sound.ENTITY_FROG_EAT, 1, 1);
+                    world.playSound(location, Sound.ENTITY_FROG_EAT, 1, 1);
                 }
                 case AnimationNames.RESET -> this.remove(ValueIndex.FROG.POSE);
             }

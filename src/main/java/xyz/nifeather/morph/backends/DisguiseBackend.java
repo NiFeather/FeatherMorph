@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -82,18 +83,19 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
 
     /**
      * 将某一玩家伪装成给定Wrapper中的实例
-     * @param player 目标玩家
+     *
+     * @param entity
      * @param wrapper 目标Wrapper
      * @apiNote 传入的wrapper可能不是此后端产出的Wrapper，需要对其进行验证
      */
-    public abstract void disguise(Player player, DisguiseWrapper<?> wrapper) throws ExecutionErrorException;
+    public abstract void disguise(LivingEntity entity, DisguiseWrapper<?> wrapper) throws ExecutionErrorException;
 
     /**
      * Undisguise a player
-     * @param player The player to undisguise
-     * @return Whether the operation was successful
+     *
+     * @param entity@return Whether the operation was successful
      */
-    public abstract boolean unDisguise(Player player);
+    public abstract boolean unDisguise(LivingEntity entity);
 
     /**
      * Deserialize a wrapper instance from the giving parameter

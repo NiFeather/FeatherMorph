@@ -2,15 +2,16 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 public abstract class AbstractNautilusWatcher extends TameableAnimalWatcher
 {
-    protected AbstractNautilusWatcher(Player bindingPlayer, EntityType entityType)
+    protected AbstractNautilusWatcher(IBindTarget bindTarget, EntityType entityType)
     {
-        super(bindingPlayer, entityType);
+        super(bindTarget, entityType);
     }
 
     @Override

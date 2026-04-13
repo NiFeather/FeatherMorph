@@ -2,8 +2,12 @@ package xyz.nifeather.morph.backends.server.renderer.network.registries;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.LivingEntityBindTarget;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.PlayerBindTarget;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.VirtualEntity;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.*;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.AbstractHorseWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.horses.HorseWatcher;
@@ -105,20 +109,25 @@ public class WatcherIndex
         setTypeWatcher(EntityType.ZOMBIE_NAUTILUS, ZombieNautilusWatcher::new);
     }
 
-    private void setTypeWatcher(EntityType type, Function<Player, SingleWatcher> func)
+    private void setTypeWatcher(EntityType type, Function<IBindTarget, VirtualEntity> func)
     {
         typeWatcherMap.put(type, func);
     }
 
-    private final Map<EntityType, Function<Player, SingleWatcher>> typeWatcherMap = new Object2ObjectOpenHashMap<>();
+    private final Map<EntityType, Function<IBindTarget, VirtualEntity>> typeWatcherMap = new Object2ObjectOpenHashMap<>();
 
-    public SingleWatcher getWatcherForType(Player bindingPlayer, EntityType entityType)
+    private IBindTarget selectBinder(LivingEntity entity)
+    {
+        return entity instanceof Player player ? new PlayerBindTarget(player) : new LivingEntityBindTarget(entity);
+    }
+
+    public VirtualEntity getWatcherForType(LivingEntity living, EntityType entityType)
     {
         var watcherFunc = typeWatcherMap.getOrDefault(entityType, null);
 
         if (watcherFunc == null)
-            return new LivingEntityWatcher(bindingPlayer, entityType);
+            return new LivingEntityWatcher(selectBinder(living), entityType);
 
-        return watcherFunc.apply(bindingPlayer);
+        return watcherFunc.apply(selectBinder(living));
     }
 }

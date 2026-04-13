@@ -1,6 +1,5 @@
 package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types;
 
-import com.destroystokyo.paper.ClientOption;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.protocol.player.GameMode;
@@ -13,8 +12,10 @@ import com.mojang.authlib.GameProfile;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -41,9 +42,9 @@ public class PlayerWatcher extends LivingEntityWatcher
 
     private final PlayerPropertyCollection playerDisguiseProperties;
 
-    public PlayerWatcher(Player bindingPlayer)
+    public PlayerWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.PLAYER);
+        super(bindTarget, EntityType.PLAYER);
 
         this.playerDisguiseProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PlayerPropertyCollection.class);
     }
@@ -53,11 +54,13 @@ public class PlayerWatcher extends LivingEntityWatcher
     {
         super.doSync();
 
-        var bindingPlayer = getBindingPlayer();
-        this.writeTemp(ValueIndex.PLAYER.SKIN_FLAGS, (byte)bindingPlayer.getClientOption(ClientOption.SKIN_PARTS).getRaw());
+        this.writeTemp(ValueIndex.PLAYER.SKIN_FLAGS, bindTarget.skinFlags());
 
         if (!this.isValuePresent(ValueIndex.PLAYER.MAINHAND))
-            this.writeTemp(ValueIndex.PLAYER.MAINHAND, bindingPlayer.getMainHand() == MainHand.LEFT ? HumanoidArm.LEFT : HumanoidArm.RIGHT);
+        {
+            HumanoidArm mainHand = bindTarget.mainHand() == MainHand.LEFT ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
+            this.writeTemp(ValueIndex.PLAYER.MAINHAND, mainHand);
+        }
     }
 
     @Override
@@ -88,10 +91,9 @@ public class PlayerWatcher extends LivingEntityWatcher
     {
         super.onEntryWrite(entry, oldVal, newVal);
 
-        if (entry.equals(CustomEntries.PROFILE) && isPlayerOnline() && !isSilent())
+        if (entry.equals(CustomEntries.PROFILE) && isActive() && !isSilent())
         {
-            var player = getBindingPlayer();
-            var affected = getAffectedPlayers(player);
+            var affected = getAffectedPlayers();
 
             if (affected.isEmpty())
                 return;
@@ -125,8 +127,8 @@ public class PlayerWatcher extends LivingEntityWatcher
                     this.remove(ValueIndex.PLAYER.POSE);
                     this.writePersistent(ValueIndex.PLAYER.POSE, EntityPose.SLEEPING);
 
-                    var playerPos = getBindingPlayer().getLocation();
-                    var vec3i = new Vector3i(playerPos.getBlockX(), playerPos.getBlockY(), playerPos.getBlockZ());
+                    var position = location();
+                    var vec3i = new Vector3i(position.getBlockX(), position.getBlockY(), position.getBlockZ());
                     this.writePersistent(ValueIndex.PLAYER.BED_POS, Optional.of(vec3i));
                 }
                 case AnimationNames.CRAWL ->
@@ -136,7 +138,7 @@ public class PlayerWatcher extends LivingEntityWatcher
                 }
                 case AnimationNames.STANDUP, AnimationNames.RESET ->
                 {
-                    this.writePersistent(ValueIndex.PLAYER.POSE, SpigotConversionUtil.fromBukkitPose(getBindingPlayer().getPose()));
+                    this.writePersistent(ValueIndex.PLAYER.POSE, SpigotConversionUtil.fromBukkitPose(bindTarget.pose()));
                     resetValues();
                 }
             }
@@ -165,23 +167,6 @@ public class PlayerWatcher extends LivingEntityWatcher
         return List.of(infoRemove, infoUpdate);
     }
 
-    public List<PacketWrapper<?>> buildSpawnPackets(boolean includePlayerInfo) throws BuildFailedException
-    {
-        var list = new ObjectArrayList<PacketWrapper<?>>();
-
-        var gameProfile = this.readEntryOrThrow(CustomEntries.PROFILE);
-
-        if (gameProfile.name().isBlank())
-            throw new IllegalArgumentException("GameProfile name is empty!");
-
-        if (includePlayerInfo)
-            list.addAll(this.buildPlayerInfoPackets());
-
-        list.addAll(super.buildSpawnPackets());
-
-        return list;
-    }
-
     @Override
     public List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException
     {
@@ -194,9 +179,20 @@ public class PlayerWatcher extends LivingEntityWatcher
     }
 
     @Override
-    public List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException
+    protected List<PacketWrapper<?>> doBuildSpawnPackets() throws BuildFailedException
     {
-        return buildSpawnPackets(true);
+        var list = new ObjectArrayList<PacketWrapper<?>>();
+
+        var gameProfile = this.readEntryOrThrow(CustomEntries.PROFILE);
+
+        if (gameProfile.name().isBlank())
+            throw new IllegalArgumentException("GameProfile name is empty!");
+
+        list.addAll(this.buildPlayerInfoPackets());
+
+        list.addAll(super.doBuildSpawnPackets());
+
+        return list;
     }
 
     private void resetValues()

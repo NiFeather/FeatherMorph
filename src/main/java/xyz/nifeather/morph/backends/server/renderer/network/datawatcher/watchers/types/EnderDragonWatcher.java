@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -15,9 +16,9 @@ import java.util.Objects;
 
 public class EnderDragonWatcher extends LivingEntityWatcher
 {
-    public EnderDragonWatcher(Player bindingPlayer)
+    public EnderDragonWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.ENDER_DRAGON);
+        super(bindTarget, EntityType.ENDER_DRAGON);
 
         this.properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(EnderDragonPropertyCollection.class);
     }
@@ -53,7 +54,7 @@ public class EnderDragonWatcher extends LivingEntityWatcher
     public <X> @Nullable X readEntry(CustomEntry<X> entry)
     {
         if (Objects.equals(entry, CustomEntries.OVERLAYED_YAW))
-            return (X) Float.valueOf(180f + getBindingPlayer().getYaw());
+            return (X) Float.valueOf(180f + location().getYaw());
 
         return super.readEntry(entry);
     }

@@ -71,7 +71,7 @@ public class ZombieVillagerPropertyCollection extends BaseLivingEntityPropertyCo
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull ZombieVillager targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull ZombieVillager targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.LivingEntityWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -20,9 +21,9 @@ public class AbstractSlimeWatcher extends LivingEntityWatcher
         register(ValueIndex.SLIME_MAGMA);
     }
 
-    public AbstractSlimeWatcher(Player bindingPlayer, EntityType entityType)
+    public AbstractSlimeWatcher(IBindTarget bindTarget, EntityType entityType)
     {
-        super(bindingPlayer, entityType);
+        super(bindTarget, entityType);
     }
 
     @Override

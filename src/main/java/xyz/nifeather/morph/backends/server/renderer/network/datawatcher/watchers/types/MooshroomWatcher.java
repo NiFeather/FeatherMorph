@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.MooshroomValues;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
@@ -12,9 +13,9 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.MooshroomPropertyCollect
 
 public class MooshroomWatcher extends LivingEntityWatcher
 {
-    public MooshroomWatcher(Player bindingPlayer)
+    public MooshroomWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.MOOSHROOM);
+        super(bindTarget, EntityType.MOOSHROOM);
     }
 
     @Override

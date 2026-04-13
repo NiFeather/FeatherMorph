@@ -3,15 +3,16 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.utilities.NbtUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
 public class TameableAnimalWatcher extends LivingEntityWatcher
 {
-    protected TameableAnimalWatcher(Player bindingPlayer, EntityType entityType)
+    protected TameableAnimalWatcher(IBindTarget bindTarget, EntityType entityType)
     {
-        super(bindingPlayer, entityType);
+        super(bindTarget, entityType);
     }
 
     @Override

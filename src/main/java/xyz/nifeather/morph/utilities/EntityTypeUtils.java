@@ -373,8 +373,6 @@ public class EntityTypeUtils
     @Nullable
     public static String getDamageSoundKey(EntityType type)
     {
-        if (type == EntityType.PLAYER) return null;
-
         if (type == EntityType.ARMOR_STAND)
             return "entity.armor_stand.hit";
 

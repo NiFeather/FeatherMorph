@@ -68,7 +68,7 @@ public class WolfPropertyCollection extends BaseLivingEntityPropertyCollection<W
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Wolf targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Wolf targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

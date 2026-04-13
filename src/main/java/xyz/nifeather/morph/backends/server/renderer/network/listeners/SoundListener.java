@@ -33,9 +33,6 @@ public class SoundListener extends ProtocolListener
 
         var targetPlayer = (Player) event.getPlayer();
 
-        if (targetPlayer == null)
-            return;
-
         var wrapper = new WrapperPlayServerSoundEffect(event);
         var effectPosition = wrapper.getEffectPosition();
         var positionAsLocation = new Location(targetPlayer.getWorld(), effectPosition.x, effectPosition.y, effectPosition.z);
@@ -47,22 +44,20 @@ public class SoundListener extends ProtocolListener
             if (!w.isActive())
                 return false;
 
-            var playerLocation = w.getBindingPlayer().getLocation();
+            var location = w.location();
 
-            if (!Objects.equals(playerLocation.getWorld(), positionAsLocation.getWorld()))
+            if (!Objects.equals(location.getWorld(), positionAsLocation.getWorld()))
                 return false;
 
-            var locX = (int) (playerLocation.x() * 8);
-            var locY = (int) (playerLocation.y() * 8);
-            var locZ = (int) (playerLocation.z() * 8);
+            var locX = (int) (location.x() * 8);
+            var locY = (int) (location.y() * 8);
+            var locZ = (int) (location.z() * 8);
 
             return effectPosition.x == locX && effectPosition.y == locY && effectPosition.z == locZ;
         }).findFirst().orElse(null);
 
-        if (matchingWatcher == null || matchingWatcher.getEntityType() == EntityType.PLAYER)
+        if (matchingWatcher == null)
             return;
-
-        event.markForReEncode(true);
 
         var sound = wrapper.getSound().getSoundId();
         var path = sound.toString();
@@ -76,9 +71,15 @@ public class SoundListener extends ProtocolListener
             var soundId = EntityTypeUtils.getDamageSoundKey(matchingWatcher.getEntityType());
             if (soundId == null) return;
 
+            event.markForReEncode(true);
+
             ResourceLocation rL = new ResourceLocation(soundId);
 
             wrapper.setSound(new StaticSound(rL, wrapper.getVolume()));
+        }
+        else
+        {
+            event.setCancelled(true);
         }
     }
 }

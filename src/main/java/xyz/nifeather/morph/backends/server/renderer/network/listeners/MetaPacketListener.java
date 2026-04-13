@@ -4,7 +4,6 @@ import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import xiamomc.pluginbase.Annotations.Resolved;
-import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
 /**
@@ -34,15 +33,15 @@ public class MetaPacketListener extends ProtocolListener
     private void onMetaPacket(WrapperPlayServerEntityMetadata packet, PacketSendEvent packetEvent)
     {
         //获取此包的来源实体
-        var sourcePlayer = getPlayerFrom(packet.getEntityId());
+        var sourceEntity = getEntityFrom(packet.getEntityId(), packetEvent.getUser());
 
         // How could this be?!
-        if (sourcePlayer == null)
+        if (sourceEntity == null)
             return;
 
-        if (sourcePlayer.equals(packetEvent.getPlayer())) return;
+        if (sourceEntity.equals(packetEvent.getPlayer())) return;
 
-        var watcher = registry.getWatcher(sourcePlayer.getUniqueId());
+        var watcher = registry.getWatcher(sourceEntity.getUniqueId());
 
         if (watcher == null)
             return;
@@ -51,7 +50,7 @@ public class MetaPacketListener extends ProtocolListener
         var targetPlayer = packetEvent.getPlayer();
 
         //只拦截其他人的Meta
-        if (targetPlayer.equals(sourcePlayer))
+        if (targetPlayer.equals(sourceEntity))
             return;
 
         var wrapper = new WrapperPlayServerEntityMetadata(packetEvent);
@@ -62,7 +61,7 @@ public class MetaPacketListener extends ProtocolListener
         }
         catch (Exception e)
         {
-            handleException(sourcePlayer, watcher, e);
+            handleException(sourceEntity, watcher, e);
         }
     }
 }

@@ -5,6 +5,7 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -12,9 +13,9 @@ import xyz.nifeather.morph.misc.AnimationNames;
 
 public class SnifferWatcher extends LivingEntityWatcher
 {
-    public SnifferWatcher(Player bindingPlayer)
+    public SnifferWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.SNIFFER);
+        super(bindTarget, EntityType.SNIFFER);
     }
 
     @Override
@@ -32,8 +33,8 @@ public class SnifferWatcher extends LivingEntityWatcher
 
         if (entry.equals(CustomEntries.ANIMATION))
         {
-            var bindingPlayer = getBindingPlayer();
-            var world = bindingPlayer.getWorld();
+            var location = location();
+            var world = location.getWorld();
             var id = newVal.toString();
 
             switch (id)
@@ -41,7 +42,7 @@ public class SnifferWatcher extends LivingEntityWatcher
                 case AnimationNames.SNIFF ->
                 {
                     this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, SnifferState.SNIFFING);
-                    world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_SNIFFER_SNIFFING, SoundCategory.NEUTRAL, 1, 1);
+                    world.playSound(location, Sound.ENTITY_SNIFFER_SNIFFING, SoundCategory.NEUTRAL, 1, 1);
                 }
                 case AnimationNames.RESET ->
                 {

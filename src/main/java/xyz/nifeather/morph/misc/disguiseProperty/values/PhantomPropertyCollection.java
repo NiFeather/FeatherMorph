@@ -38,7 +38,7 @@ public class PhantomPropertyCollection extends BaseLivingEntityPropertyCollectio
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Phantom targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Phantom targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

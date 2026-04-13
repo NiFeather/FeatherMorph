@@ -5,13 +5,14 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.EventWrapper;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.VirtualEntity;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.types.AgeableMobWatcher;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -188,26 +189,26 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         bindingWatcher.writeEntry(CustomEntries.ATTACK_ANIMATION, true);
     }
 
-    private Player bindingPlayer;
+    private LivingEntity bindingEntity;
 
-    public Player getBindingPlayer()
+    public LivingEntity getBindingEntity()
     {
-        return bindingPlayer;
+        return bindingEntity;
     }
 
-    private SingleWatcher bindingWatcher;
+    private VirtualEntity bindingWatcher;
 
     @Nullable
-    public SingleWatcher getBindingWatcher()
+    public VirtualEntity getBindingWatcher()
     {
         return bindingWatcher;
     }
 
-    public void setRenderParameters(@NotNull Player newBinding, @NotNull SingleWatcher bindingWatcher)
+    public void setRenderParameters(@NotNull LivingEntity newBinding, @NotNull VirtualEntity bindingWatcher)
     {
         Objects.requireNonNull(bindingWatcher, "Null Watcher!");
 
-        bindingPlayer = newBinding;
+        bindingEntity = newBinding;
 
         if (this.bindingWatcher != null)
         {
@@ -219,7 +220,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
         refreshRegistry(bindingWatcher);
     }
 
-    private void refreshRegistry(@NotNull SingleWatcher bindingWatcher)
+    private void refreshRegistry(@NotNull VirtualEntity bindingWatcher)
     {
         this.disguiseProperties.forEach((property, value) -> applyProperty((SingleProperty<Object>) property, value));
 
@@ -248,7 +249,7 @@ public class ServerDisguiseWrapper extends EventWrapper<ServerDisguise>
             return;
 
         this.bindingWatcher.writeEntry(CustomEntries.SPAWN_ID, newInstance.getEntityId());
-        this.bindingPlayer = newInstance;
+        this.bindingEntity = newInstance;
 
         if (bindingWatcher.readEntryOrDefault(CustomEntries.WARDEN_VANISHED, false))
             bindingWatcher.writeEntry(CustomEntries.ANIMATION, AnimationNames.APPEAR);

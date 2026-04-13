@@ -4,11 +4,13 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.BindableVirtualEntity;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.VirtualEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +20,7 @@ import java.util.function.Consumer;
 
 public class RenderRegistry extends MorphPluginObject
 {
-    public record EventParameters(@Nullable Player player, SingleWatcher watcher)
+    public record EventParameters(@Nullable LivingEntity entity, VirtualEntity watcher)
     {
     }
 
@@ -36,9 +38,9 @@ public class RenderRegistry extends MorphPluginObject
         onRegisterConsumers.put(source, consumer);
     }
 
-    private void callRegister(Player player, SingleWatcher watcher)
+    private void callRegister(LivingEntity living, VirtualEntity watcher)
     {
-        var ep = new EventParameters(player, watcher);
+        var ep = new EventParameters(living, watcher);
         onRegisterConsumers.forEach((source, consumer) -> consumer.accept(ep));
     }
 
@@ -47,29 +49,29 @@ public class RenderRegistry extends MorphPluginObject
         unRegisterConsumers.put(source, consumer);
     }
 
-    private void callUnregister(@Nullable Player player, SingleWatcher watcher)
+    private void callUnregister(@Nullable LivingEntity living, VirtualEntity watcher)
     {
-        unRegisterConsumers.forEach((source, consumer) -> consumer.accept(new EventParameters(player, watcher)));
+        unRegisterConsumers.forEach((source, consumer) -> consumer.accept(new EventParameters(living, watcher)));
     }
 
     //region Registry
 
-    private final Map<UUID, SingleWatcher> watcherMap = new ConcurrentHashMap<>();
+    private final Map<UUID, VirtualEntity> watcherMap = new ConcurrentHashMap<>();
 
-    public List<SingleWatcher> getWatchers()
+    public List<VirtualEntity> getWatchers()
     {
         return new ObjectArrayList<>(watcherMap.values());
     }
 
     @Nullable
     @Deprecated(forRemoval = true)
-    public SingleWatcher getWatcher(Entity entity)
+    public VirtualEntity getWatcher(Entity entity)
     {
         return getWatcher(entity.getUniqueId());
     }
 
     @Nullable
-    public SingleWatcher getWatcher(UUID uuid)
+    public VirtualEntity getWatcher(UUID uuid)
     {
         return watcherMap.getOrDefault(uuid, null);
     }
@@ -85,12 +87,13 @@ public class RenderRegistry extends MorphPluginObject
      * @apiNote The watcher returned is disposed
      */
     @Nullable
-    public SingleWatcher unregister(UUID uuid)
+    public VirtualEntity unregister(UUID uuid)
     {
         var watcher = watcherMap.remove(uuid);
         if (watcher == null) return null;
 
-        callUnregister(Bukkit.getPlayer(uuid), watcher);
+        var entity = Bukkit.getEntity(uuid);
+        callUnregister(entity instanceof LivingEntity living ? living : null, watcher);
 
         watcher.setParentRegistry(null);
         watcher.dispose();
@@ -98,26 +101,37 @@ public class RenderRegistry extends MorphPluginObject
         return watcher;
     }
 
+    public void unregister(VirtualEntity virtualEntity)
+    {
+        var entry = watcherMap.entrySet().stream().filter(e -> e.getValue().equals(virtualEntity))
+                .findFirst()
+                .orElse(null);
+
+        if (entry == null) return;
+
+        watcherMap.remove(entry.getKey(), entry.getValue());
+    }
+
     /**
      * 注册玩家的伪装类型
-     * @param player 目标玩家
+     * @param living 目标实体
      * @param registerParameters 注册参数
      * @param watcherConsumer Watcher的编辑函数，用于在注册事件前编辑Watcher的各项属性
      */
-    public SingleWatcher register(@NotNull Player player, RegisterParameters registerParameters, Consumer<SingleWatcher> watcherConsumer)
+    public VirtualEntity register(@NotNull LivingEntity living, RegisterParameters registerParameters, Consumer<VirtualEntity> watcherConsumer)
         throws IllegalArgumentException
     {
-        var watcher = WatcherIndex.getInstance().getWatcherForType(player, registerParameters.entityType());
+        var watcher = WatcherIndex.getInstance().getWatcherForType(living, registerParameters.entityType());
 
         watcher.markSilent(this);
 
         //设定初始值
         watcher.writeEntry(CustomEntries.DISGUISE_NAME, registerParameters.name());
-        watcher.writeEntry(CustomEntries.SPAWN_ID, player.getEntityId());
+        watcher.writeEntry(CustomEntries.SPAWN_ID, living.getEntityId());
 
         watcherConsumer.accept(watcher);
 
-        registerWithWatcher(player.getUniqueId(), watcher);
+        registerWithWatcher(living.getUniqueId(), watcher);
         watcher.unmarkSilent(this);
 
         return watcher;
@@ -126,13 +140,10 @@ public class RenderRegistry extends MorphPluginObject
     /**
      * 注册UUID对应的伪装类型
      * @param uuid 目标玩家的UUID
-     * @param watcher 对应的 {@link SingleWatcher}
+     * @param watcher 对应的 {@link VirtualEntity}
      */
-    public void registerWithWatcher(@NotNull UUID uuid, @NotNull SingleWatcher watcher) throws IllegalArgumentException
+    public void registerWithWatcher(@NotNull UUID uuid, @NotNull VirtualEntity watcher) throws IllegalArgumentException
     {
-        if (!watcher.getBindingPlayer().getUniqueId().equals(uuid))
-            throw new IllegalArgumentException("Watcher UUID doesn't match with player's UUID!");
-
         watcherMap.put(uuid, watcher);
 
         watcher.setParentRegistry(this);

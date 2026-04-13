@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Panda;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -16,9 +17,9 @@ import java.util.Arrays;
 
 public class PandaWatcher extends LivingEntityWatcher
 {
-    public PandaWatcher(Player bindingPlayer)
+    public PandaWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.PANDA);
+        super(bindTarget, EntityType.PANDA);
     }
 
     @Override

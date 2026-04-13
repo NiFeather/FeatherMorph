@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.values.SnowGolemValues;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
@@ -11,9 +12,9 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.SnowGolemPropertyCollect
 
 public class SnowGolemWatcher extends LivingEntityWatcher
 {
-    public SnowGolemWatcher(Player bindingPlayer)
+    public SnowGolemWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.SNOW_GOLEM);
+        super(bindTarget, EntityType.SNOW_GOLEM);
     }
 
     @Override

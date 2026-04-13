@@ -4,6 +4,9 @@ import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
@@ -11,6 +14,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Listener used to override the equipment so that we can display the disguise's equipment.
@@ -23,7 +27,7 @@ public class EquipmentPacketListener extends ProtocolListener
 
     public EquipmentPacketListener()
     {
-        registry.onUnRegister(this, parameters -> alreadyFake.remove(parameters.player()));
+        registry.onUnRegister(this, parameters -> alreadyFake.remove(parameters.entity()));
     }
 
     @Override
@@ -43,18 +47,21 @@ public class EquipmentPacketListener extends ProtocolListener
         onEquipmentPacket(wrapper, event);
     }
 
-    private final Map<Player, Boolean> alreadyFake = new Object2ObjectOpenHashMap<>();
+    private final Map<LivingEntity, Boolean> alreadyFake = new Object2ObjectOpenHashMap<>();
 
     private void onEquipmentPacket(WrapperPlayServerEntityEquipment packet, PacketSendEvent event)
     {
-        if (PacketFactory.isEquipmentPacketOurs(packet))
+        var viewingUser = event.getUser();
+        var viewingPlayer = Bukkit.getPlayer(viewingUser.getUUID());
+
+        if (PacketFactory.isEquipmentPacketOurs(Objects.requireNonNull(viewingPlayer).getWorld(), packet))
         {
             packet.setEntityId(Math.abs(packet.getEntityId()));
             return;
         }
 
         //获取此包的来源实体
-        var sourcePlayer = getPlayerFrom(packet.getEntityId());
+        var sourcePlayer = getEntityFrom(packet.getEntityId(), event.getUser());
         if (sourcePlayer == null)
             return;
 

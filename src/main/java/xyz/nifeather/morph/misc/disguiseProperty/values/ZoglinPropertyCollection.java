@@ -26,7 +26,7 @@ public class ZoglinPropertyCollection extends BaseLivingEntityPropertyCollection
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Zoglin targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Zoglin targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

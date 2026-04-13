@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -11,9 +12,9 @@ import xyz.nifeather.morph.misc.disguiseProperty.values.HorsePropertyCollection;
 
 public class HorseWatcher extends AbstractHorseWatcher
 {
-    public HorseWatcher(Player bindingPlayer)
+    public HorseWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.HORSE);
+        super(bindTarget, EntityType.HORSE);
     }
 
     @Override

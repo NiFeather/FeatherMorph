@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
@@ -16,9 +17,9 @@ public class CowWatcher extends AgeableMobWatcher
 {
     private final CowPropertyCollection cowProperties;
 
-    public CowWatcher(Player bindingPlayer)
+    public CowWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.COW);
+        super(bindTarget, EntityType.COW);
 
         cowProperties = DisguiseProperties.INSTANCE.getCollectionOrThrow(CowPropertyCollection.class);
     }

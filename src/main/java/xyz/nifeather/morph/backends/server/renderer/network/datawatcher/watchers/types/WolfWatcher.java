@@ -7,6 +7,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -22,9 +23,9 @@ import java.util.UUID;
 
 public class WolfWatcher extends TameableAnimalWatcher
 {
-    public WolfWatcher(Player bindingPlayer)
+    public WolfWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.WOLF);
+        super(bindTarget, EntityType.WOLF);
     }
 
     @Override

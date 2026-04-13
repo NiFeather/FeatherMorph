@@ -3,6 +3,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -10,9 +11,9 @@ import xyz.nifeather.morph.misc.AnimationNames;
 
 public class PiglinWatcher extends LivingEntityWatcher
 {
-    public PiglinWatcher(Player bindingPlayer)
+    public PiglinWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.PIGLIN);
+        super(bindTarget, EntityType.PIGLIN);
     }
 
     @Override
@@ -31,15 +32,15 @@ public class PiglinWatcher extends LivingEntityWatcher
         if (entry.equals(CustomEntries.ANIMATION))
         {
             var animId = newVal.toString();
-            var player = getBindingPlayer();
-            var world = player.getWorld();
+            var location = location();
+            var world = location.getWorld();
 
             switch (animId)
             {
                 case AnimationNames.DANCE_START ->
                 {
                     this.writePersistent(ValueIndex.PIGLIN.DANCING, true);
-                    world.playSound(player.getLocation(), Sound.ENTITY_PIGLIN_CELEBRATE, 1, 1);
+                    world.playSound(location, Sound.ENTITY_PIGLIN_CELEBRATE, 1, 1);
                 }
                 case AnimationNames.STOP, AnimationNames.RESET -> this.writePersistent(ValueIndex.PIGLIN.DANCING, false);
             }

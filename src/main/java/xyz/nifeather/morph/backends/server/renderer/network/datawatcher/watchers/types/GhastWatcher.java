@@ -2,6 +2,7 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -16,9 +17,9 @@ public class GhastWatcher extends LivingEntityWatcher
         register(ValueIndex.GHAST);
     }
 
-    public GhastWatcher(Player bindingPlayer)
+    public GhastWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.GHAST);
+        super(bindTarget, EntityType.GHAST);
     }
 
     @Override

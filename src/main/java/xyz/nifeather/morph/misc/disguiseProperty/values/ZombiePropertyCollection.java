@@ -26,7 +26,7 @@ public class ZombiePropertyCollection extends BaseLivingEntityPropertyCollection
     }
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Zombie targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull Zombie targetEntity)
     {
         super.setupPropertiesFromEntity(propertyHandler, targetEntity);
 

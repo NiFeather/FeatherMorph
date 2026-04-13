@@ -40,7 +40,7 @@ public abstract class BaseLivingEntityPropertyCollection<E extends Entity> exten
             .build();
 
     @Override
-    protected void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity)
+    public void setupPropertiesFromEntity(PropertyHandler propertyHandler, @NotNull E targetEntity)
     {
         propertyHandler.set(CUSTOM_NAME_VISIBLE, targetEntity.isCustomNameVisible());
 

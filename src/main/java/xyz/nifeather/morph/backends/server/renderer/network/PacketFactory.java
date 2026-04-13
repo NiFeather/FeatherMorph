@@ -5,13 +5,18 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.player.Equipment;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EntityEquipment;
 import xyz.nifeather.morph.FeatherMorphMain;
 import xyz.nifeather.morph.MorphPluginObject;
-import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.BindableVirtualEntity;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.VirtualEntity;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
+import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 
 import java.util.List;
@@ -21,7 +26,7 @@ import java.util.List;
  */
 public class PacketFactory extends MorphPluginObject
 {
-    public static WrapperPlayServerEntityMetadata buildDiffMetaPacket(SingleWatcher watcher)
+    public static WrapperPlayServerEntityMetadata buildDiffMetaPacket(VirtualEntity watcher)
     {
         List<EntityData<?>> wrappedDataValues = new ObjectArrayList<>();
         var valuesToSent = watcher.getDirty();
@@ -37,44 +42,17 @@ public class PacketFactory extends MorphPluginObject
             wrappedDataValues.add(wrapped);
         });
 
-        return new WrapperPlayServerEntityMetadata(watcher.getBindingPlayer().getEntityId(), wrappedDataValues);
+        return new WrapperPlayServerEntityMetadata(watcher.readEntryOrThrow(CustomEntries.SPAWN_ID), wrappedDataValues);
     }
 
     public static final String MARK_DONT_PROCESS = "~FEATHERMORPH GENERATED METADATA, THIS MESSAGE SHOULD BE REMOVED, OR SOMETHING MAY GONE WRONG!";
 
-    public static WrapperPlayServerEntityMetadata buildFullMetaPacket(Player player, SingleWatcher watcher)
-    {
-        watcher.sync();
-
-        List<EntityData<?>> wrappedDataValues = new ObjectArrayList<>();
-
-        // Add our packet identifier!
-        if (!watcher.readEntryOrDefault(CustomEntries.DONT_INCLUDE_PACKET_IDENTIFIER, false))
-            wrappedDataValues.add(new EntityData<>(99, EntityDataTypes.STRING, MARK_DONT_PROCESS));
-
-        var valuesToSent = watcher.getOverlayedRegistry();
-        watcher.clearDirty();
-
-        valuesToSent.forEach((index, val) ->
-        {
-            var sv = watcher.getSingle(index);
-
-            if (sv == null)
-                throw new IllegalArgumentException("Not SingleValue found for index " + index);
-
-            var wrapped =  new EntityData(index, sv.type(), val);
-            wrappedDataValues.add(wrapped);
-        });
-
-        return new WrapperPlayServerEntityMetadata(player.getEntityId(), wrappedDataValues);
-    }
-
-    public static List<Equipment> getPacketeventsEquipments(Player player, SingleWatcher watcher)
+    public static List<Equipment> getPacketeventsEquipments(LivingEntity entity, VirtualEntity watcher)
     {
         var shouldDisplayFakeEquip = watcher.readEntryOrDefault(CustomEntries.DISPLAY_FAKE_EQUIPMENT, false);
         DisguiseEquipment equipment = shouldDisplayFakeEquip
                 ? watcher.readEntryOrDefault(CustomEntries.EQUIPMENT, DisguiseEquipment.empty())
-                : DisguiseEquipment.copy(player.getEquipment());
+                : DisguiseEquipment.copy(entity.getEquipment());
 
         return ProtocolEquipment.toPEEquipmentList(equipment);
     }
@@ -84,20 +62,12 @@ public class PacketFactory extends MorphPluginObject
         wrapper.setEntityId(-wrapper.getEntityId());
     }
 
-    public static boolean isEquipmentPacketOurs(WrapperPlayServerEntityEquipment wrapper)
+    public static boolean isEquipmentPacketOurs(World world, WrapperPlayServerEntityEquipment wrapper)
     {
         if (wrapper.getEntityId() > 0)
             return false;
 
-        var abs = Math.abs(wrapper.getEntityId());
-
-        var playerFound = FeatherMorphMain.getInstance()
-                .getPlatform()
-                .onlinePlayersNative()
-                .stream()
-                .filter(p -> p.getEntityId() == abs)
-                .findFirst()
-                .orElse(null);
+        var playerFound = SpigotConversionUtil.getEntityById(world, Math.abs(wrapper.getEntityId()));
 
         return playerFound != null;
     }

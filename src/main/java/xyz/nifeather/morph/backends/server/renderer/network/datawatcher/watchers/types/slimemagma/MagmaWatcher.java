@@ -2,11 +2,12 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 
 public class MagmaWatcher extends AbstractSlimeWatcher
 {
-    public MagmaWatcher(Player bindingPlayer)
+    public MagmaWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.MAGMA_CUBE);
+        super(bindTarget, EntityType.MAGMA_CUBE);
     }
 }

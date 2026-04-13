@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fox;
 import org.bukkit.entity.Player;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.syncing.IBindTarget;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -22,9 +23,9 @@ public class FoxWatcher extends AgeableMobWatcher
         register(ValueIndex.FOX);
     }
 
-    public FoxWatcher(Player bindingPlayer)
+    public FoxWatcher(IBindTarget bindTarget)
     {
-        super(bindingPlayer, EntityType.FOX);
+        super(bindTarget, EntityType.FOX);
     }
 
     @Override

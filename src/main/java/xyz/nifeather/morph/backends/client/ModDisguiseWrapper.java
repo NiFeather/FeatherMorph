@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -52,9 +52,9 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     {
         this.instance.writeProperty(property, value);
 
-        if (property.id().equals(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT) && getBindingPlayer() != null)
+        if (property.id().equals(PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT) && getBindingEntity() != null)
         {
-            backend.getNetworkingHelper().prepareMeta(getBindingPlayer())
+            backend.getNetworkingHelper().prepareMeta(getBindingEntity())
                     .setDisguiseEquipmentShown(Boolean.TRUE.equals(value))
                     .send();
 
@@ -142,16 +142,16 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     }
 
     @Nullable
-    private Player bindingPlayer;
+    private LivingEntity bindingEntity;
 
     @Nullable
-    public Player getBindingPlayer()
+    public LivingEntity getBindingEntity()
     {
-        return bindingPlayer;
+        return bindingEntity;
     }
 
-    public void setBindingPlayer(@Nullable Player player)
+    public void setBindingEntity(@Nullable LivingEntity player)
     {
-        this.bindingPlayer = player;
+        this.bindingEntity = player;
     }
 }
