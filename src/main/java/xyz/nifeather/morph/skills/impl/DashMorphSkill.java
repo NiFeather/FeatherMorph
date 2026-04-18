@@ -45,12 +45,7 @@ public class DashMorphSkill extends MorphSkill<DashConfiguration>
 
         player.setVelocity(player.getVelocity().add(playerDirection));
 
-        Sound advSound = Sound.sound()
-                .volume(0.6f).pitch(1)
-                .type(Key.key(dashSound))
-                .build();
-
-        player.getWorld().playSound(advSound, Sound.Emitter.self());
+        player.getWorld().playSound(player.getLocation(), dashSound, 0.6f, 1);
 
         return 0;
     }
