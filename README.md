@@ -1,3 +1,5 @@
+Archived, feel free to fork, although I would suggest making your own, as there aren't many documents about this project :D
+
 ![cover](./assets/cover.png)
 
 <div align="center">
