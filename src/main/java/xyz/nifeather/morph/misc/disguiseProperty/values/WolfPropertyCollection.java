@@ -42,6 +42,12 @@ public class WolfPropertyCollection extends BaseLivingEntityPropertyCollection<W
 
     public final SingleProperty<DyeColor> COLLAR_COLOR;
 
+    public final SingleProperty<Boolean> SITTING = SingleProperty.builder(PropertyNames.WOLF_SITTING, false)
+            .withInputHandle(InputHandles::readBooleanRelaxed)
+            .withOutputHandle(OutputHandles::writeBoolean)
+            .withSuggestions("true", "false")
+            .build();
+
     public WolfPropertyCollection()
     {
         initMap();
@@ -58,7 +64,7 @@ public class WolfPropertyCollection extends BaseLivingEntityPropertyCollection<W
                 .withSuggestions(Arrays.stream(DyeColor.values()).map(c -> c.name().toLowerCase()).toList())
                 .build();
 
-        registerSingle(VARIANT, OWNER, COLLAR_COLOR);
+        registerSingle(VARIANT, OWNER, COLLAR_COLOR, SITTING);
     }
 
     @Override

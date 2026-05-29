@@ -7,19 +7,18 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xiamomc.pluginbase.Exceptions.NullDependencyException;
 import xiamomc.pluginbase.Messages.FormattableMessage;
+import xyz.nifeather.morph.FeatherMorphMain;
+import xyz.nifeather.morph.api.FeatherMorphAPI;
 import xyz.nifeather.morph.backends.DisguiseBackend;
 import xyz.nifeather.morph.backends.DisguiseWrapper;
 import xyz.nifeather.morph.backends.server.renderer.ServerRenderer;
+import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
 import xyz.nifeather.morph.backends.server.renderer.utilties.WatcherUtils;
 import xyz.nifeather.morph.messages.strings.BackendStrings;
-import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.ExecutionErrorException;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguiseWrapper>
 {
@@ -184,26 +183,14 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
 
         try
         {
-            serverRenderer.refreshStateForPlayer(player, WatcherUtils.getAffectedPlayers(player));
+            serverRenderer.scheduleDisguise(watcher, WatcherUtils.getAffectedPlayers(player));
+            watcher.onDisguiseApply();
         }
         catch (NullDependencyException e)
         {
             throw ExecutionErrorException.forMethod("ServerBackend#disguise")
                     .causedBy(e)
                     .withMessage("Failed to refresh player state, watcher not registered in the renderer!")
-                    .create();
-        }
-        catch (BuildFailedException e)
-        {
-            if (!e.critical())
-            {
-                logger.warn("Renderer failed to build spawn packets, ignoring: " + e.getMessage());
-                return;
-            }
-
-            throw ExecutionErrorException.forMethod("ServerBackend#disguise")
-                    .causedBy(e)
-                    .withMessage("Renderer failed to build spawn packets")
                     .create();
         }
         catch (Exception e)
@@ -213,6 +200,25 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
                     .withMessage("Unknown error")
                     .create();
         }
+    }
+
+    @Override
+    public void respawnDisguise(DisguiseWrapper<?> wrapper)
+    {
+        if (!(wrapper instanceof ServerDisguiseWrapper serverDisguiseWrapper))
+        {
+            logger.warn("The given disguise wrapper to respawn is not an instance of ServerDisguiseWrapper, enable debug output to see stacktrace");
+
+            if (FeatherMorphMain.getInstance().debugOutputEnabled())
+                Thread.dumpStack();
+
+            return;
+        }
+
+        var watcher = serverDisguiseWrapper.getBindingWatcher();
+        if (watcher == null) return;
+
+        serverRenderer.scheduleDisguise(watcher, WatcherUtils.getAffectedPlayers(watcher.getBindingPlayer()));
     }
 
     private boolean unDisguise(Player player, boolean unregisterFromRenderer)
@@ -315,5 +321,19 @@ public class ServerBackend extends DisguiseBackend<ServerDisguise, ServerDisguis
     public Collection<ServerDisguiseWrapper> listInstances()
     {
         return disguiseWrapperMap.values();
+    }
+
+    public void onDisguiseException(SingleWatcher watcher, Throwable e)
+    {
+        var morphManger = Objects.requireNonNull(FeatherMorphAPI.instance())
+                .directAccess().morphManager();
+
+        var player = watcher.getBindingPlayer();
+
+        var state = morphManger.getDisguiseStateFor(player);
+        if (state != null)
+            state.handleException(e);
+        else
+            unDisguise(player, true);
     }
 }

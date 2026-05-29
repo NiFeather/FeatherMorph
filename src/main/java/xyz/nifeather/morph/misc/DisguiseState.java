@@ -7,6 +7,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
@@ -22,6 +23,8 @@ import xyz.nifeather.morph.messages.strings.CommandStrings;
 import xyz.nifeather.morph.messages.strings.EmoteStrings;
 import xyz.nifeather.morph.messages.MessageUtils;
 import xyz.nifeather.morph.messages.strings.MorphStrings;
+import xyz.nifeather.morph.misc.actions.ConsumerActions;
+import xyz.nifeather.morph.misc.attributes.DisguiseAttributeHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyHandler;
 import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
@@ -36,7 +39,9 @@ import xyz.nifeather.morph.network.PlayerOptions;
 import xyz.nifeather.morph.network.commands.S2C.S2CPlayAnimationCommand;
 import xyz.nifeather.morph.network.commands.S2C.set.S2CSetAnimationDisplayNameCommand;
 import xyz.nifeather.morph.network.server.MorphClientHandler;
-import xyz.nifeather.morph.providers.animation.SingleAnimation;
+import xyz.nifeather.morph.network.server.frog.S2CEntityAnimateCommand;
+import xyz.nifeather.morph.network.server.frog.S2CUpdateEntityAnimateMaskCommand;
+import xyz.nifeather.morph.providers.animation.PlayableAction;
 import xyz.nifeather.morph.providers.disguise.DisguiseProvider;
 import xyz.nifeather.morph.skills.ISkill;
 import xyz.nifeather.morph.skills.SkillManager;
@@ -73,6 +78,7 @@ public class DisguiseState extends MorphPluginObject
 
         this.soundHandler = new SoundHandler(player);
         this.abilityUpdater = new AbilityUpdater(this);
+        this.disguiseAttributes = new DisguiseAttributeHandler();
 
         this.disguiseWaypointTransmitter = transmitWaypoint
                 ? new DisguiseWaypointTransmitter(this)
@@ -89,41 +95,51 @@ public class DisguiseState extends MorphPluginObject
 
         this.cachedPlayer = CacheWithDefault.of(player);
 
-        animationSequence.setCooldown(10);
-        animationSequence.onNewAnimation(anim ->
+        disguiseAttributes.initializeFor(getEntityType());
+        disguiseAttributes.hookOnAttributeChange(this::onDisguiseAttributeChange);
+
+        actionHandler.setCooldown(10);
+        actionHandler.onNewStage(anim ->
         {
-            var animSubId = anim.subId();
+            anim.onPlay().accept(this);
 
-            if (anim.availableForClient())
-                clientHandler.sendCommand(getPlayer(), new S2CPlayAnimationCommand(animSubId));
-
-            this.getDisguiseWrapper().playAnimation(animSubId);
-
-            if (animSubId.startsWith("exec_"))
-                handleInternalExec(animSubId);
+            var legacyName = anim.legacyName();
+            if (legacyName != null)
+                clientHandler.sendCommand(getPlayer(), new S2CPlayAnimationCommand(legacyName));
         });
-        animationSequence.onNewAnimationSequence(newAnimSeqId ->
-        {
-            clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(newAnimSeqId));
 
-            // Not done yet...
-            /*
-            if (newAnimSeqId.equals(AnimationNames.NONE))
-            {
-                var isPersistent = this.sequencePersistent.get();
-                this.sequencePersistent.set(false);
+        actionHandler.onStageFinish(stage -> stage.onFinish().accept(this));
 
-                if (!isPersistent)
-                    clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(newAnimSeqId));
-            }
-            else
-            {
-                clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(newAnimSeqId));
-            }
-            */
-        });
+        actionHandler.onNewAction(name ->
+                clientHandler.sendCommand(getPlayer(), new S2CSetAnimationDisplayNameCommand(name)));
 
         disguisePropertyHandler().hookOnPropertyWrite(this::onPropertyWrite);
+        disguisePropertyHandler().hookOnPropertyDiscard(this::onPropertyDiscard);
+
+        disguisePropertyHandler().hookOnTemporaryPropertyWrite(this::onTempPropertyWrite);
+        disguisePropertyHandler().hookOnTemporaryPropertyDiscard(this::onTemporaryDiscard);
+    }
+
+    private void onTemporaryDiscard(SingleProperty<Object> property)
+    {
+        var persistValue = disguisePropertyHandler().getOr(property, null);
+        if (persistValue == null)
+        {
+            disguiseWrapper.discardProperty(property);
+            return;
+        }
+
+        disguiseWrapper.writeProperty(property, persistValue);
+    }
+
+    private <V> void onTempPropertyWrite(SingleProperty<V> proper, V o)
+    {
+        this.onPropertyWrite(proper, o);
+    }
+
+    private void onPropertyDiscard(SingleProperty<Object> property)
+    {
+        disguiseWrapper.discardProperty(property);
     }
 
     private void onPropertyWrite(SingleProperty<?> singleProperty, Object o)
@@ -146,26 +162,16 @@ public class DisguiseState extends MorphPluginObject
         disguiseWrapper.writeProperty((SingleProperty<Object>) singleProperty, o);
     }
 
-    private final AtomicBoolean sequencePersistent = new AtomicBoolean(false);
+    private void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    {
+        disguiseWrapper.onDisguiseAttributeChange(id, attribute);
+    }
 
     @Resolved(shouldSolveImmediately = true)
     private SkillManager skillManager;
 
     @Resolved(shouldSolveImmediately = true)
     private MorphClientHandler clientHandler;
-
-    private void handleInternalExec(String animationSubId)
-    {
-        switch (animationSubId)
-        {
-            case AnimationNames.INTERNAL_DISABLE_AMBIENT -> this.requestAmbientState(this, true);
-            case AnimationNames.INTERNAL_ENABLE_AMBIENT -> this.requestAmbientState(this, false);
-            case AnimationNames.INTERNAL_DISABLE_SKILL -> this.requestSkillState(this, true);
-            case AnimationNames.INTERNAL_ENABLE_SKILL -> this.requestSkillState(this, false);
-            case AnimationNames.INTERNAL_DISABLE_BOSSBAR -> this.requestBossbarState(this, true);
-            case AnimationNames.INTERNAL_ENABLE_BOSSBAR -> this.requestBossbarState(this, false);
-        }
-    }
 
     private final List<Object> disableSkillRequests = Collections.synchronizedList(new ObjectArrayList<>());
     private final List<Object> disableAmbientRequests = Collections.synchronizedList(new ObjectArrayList<>());
@@ -229,16 +235,16 @@ public class DisguiseState extends MorphPluginObject
 
     private final PlayerMeta playerMeta;
 
-    private final AnimationSequence animationSequence = new AnimationSequence();
+    private final AnimationHandler actionHandler = new AnimationHandler();
 
-    public void stopAnimations()
+    public void stopActions()
     {
-        animationSequence.reset();
+        actionHandler.reset();
     }
 
     public void onPlayerQuit()
     {
-        this.stopAnimations();
+        this.stopActions();
 
         this.abilityUpdater.onPlayerOffline();
         this.getDisguiseWrapper().onPlayerOffline();
@@ -267,52 +273,63 @@ public class DisguiseState extends MorphPluginObject
     /**
      * @return Whether success.
      */
-    public boolean tryScheduleSequence(@NotNull String sequenceIdentifier,
-                                       List<SingleAnimation> sequence,
-                                       boolean persistent)
+    public boolean tryScheduleAction(@NotNull String name, PlayableAction action)
     {
         if (!canScheduleSequence()) return false;
-        this.scheduleSequence(sequenceIdentifier, sequence, persistent);
+        this.scheduleAction(name, action);
 
         return true;
     }
 
-    public void scheduleSequence(String sequenceIdentifier,
-                                 List<SingleAnimation> sequence,
-                                 boolean persistent)
+    public void scheduleAction(String name, PlayableAction action)
     {
-        this.scheduleSequence(sequenceIdentifier, sequence, true, persistent);
+        this.scheduleAction(name, action, true);
     }
 
-    private void scheduleSequence(String sequenceIdentifier,
-                                  List<SingleAnimation> sequence,
-                                  boolean checkPermission,
-                                  boolean persistent)
+    private void scheduleAction(String name, PlayableAction action, boolean checkPermission)
     {
         var player = getPlayer();
 
-        if (checkPermission && sequenceIdentifier.equals(AnimationNames.RESET)
-                || !PermissionUtils.hasPermission(
-                        player,
-                        CommonPermissions.animationPermissionOf(sequenceIdentifier, this.getDisguiseIdentifier()),
-                        true))
+        if (checkPermission
+                && !PermissionUtils.hasPermission(player, CommonPermissions.animationPermissionOf(name, this.getDisguiseIdentifier()), true))
         {
             MessageUtils.send(player, CommandStrings.noPermissionMessage());
             return;
         }
 
-        this.animationSequence.scheduleNext(sequenceIdentifier, sequence);
-        this.sequencePersistent.set(persistent);
+        this.actionHandler.scheduleNext(name, action);
 
         var animationString = CommandStrings.goingToPlayAnimation()
-                .resolve("what", EmoteStrings.get(sequenceIdentifier));
+                .resolve("what", EmoteStrings.get(name));
 
         MessageUtils.send(player, animationString);
     }
 
-    public AnimationSequence getAnimationSequence()
+    public AnimationHandler getActionHandler()
     {
-        return animationSequence;
+        return actionHandler;
+    }
+
+    /**
+     * See {@link net.minecraft.network.protocol.game.ClientboundAnimatePacket}
+     * @param animateName
+     */
+    @ApiStatus.Experimental
+    public void playEntityAnimation(String animateName)
+    {
+        clientHandler.sendCommand(getPlayer(), new S2CEntityAnimateCommand(animateName));
+        disguiseWrapper.playEntityAnimation(animateName);
+    }
+
+    /**
+     * Set whether allow disguise to play several entity animates triggered by the player. <br>
+     * Note that this doesn't affect {@link DisguiseState#playEntityAnimation(String)}
+     */
+    @ApiStatus.Experimental
+    public void updateEntityAnimateMask(String animateName, boolean isAllowed)
+    {
+        clientHandler.sendCommand(getPlayer(), new S2CUpdateEntityAnimateMaskCommand(animateName, isAllowed));
+        disguiseWrapper.updateEntityAnimateMask(animateName, isAllowed);
     }
 
     /**
@@ -498,6 +515,16 @@ public class DisguiseState extends MorphPluginObject
 
         this.bossbar = bossbar;
     }
+
+    //region Disguise Attribute
+
+    private final DisguiseAttributeHandler disguiseAttributes;
+    public DisguiseAttributeHandler disguiseAttributeHandler()
+    {
+        return disguiseAttributes;
+    }
+
+    //endregion Disguise Attribute
 
     //region Disguise Property
 
@@ -723,9 +750,12 @@ public class DisguiseState extends MorphPluginObject
      * Get A {@link CompletableFuture} that binds to this state.<br>
      * Finishes when this state has been disposed.<br>
      * Fail with exception if an error occurred while updating this state
+     * @apiNote If you wish to do something immediately on disposal, use {@link DisguiseState#onDispose(Consumer)}
      */
     public CompletableFuture<DisguiseState> getStateFuture()
     {
+        // Return a new CompletableFuture, so that folks calling this method can do their own things.
+        // Like MorphManager#applyDisguise
         var instance = new CompletableFuture<DisguiseState>();
         stateFuture.thenAccept(instance::complete);
         stateFuture.exceptionally(t ->
@@ -810,7 +840,7 @@ public class DisguiseState extends MorphPluginObject
         if (this.canPlayAmbient())
             this.getSoundHandler().update();
 
-        this.animationSequence.update();
+        this.actionHandler.update();
         this.disguiseWaypointTransmitter.tick();
         this.skillUpdater.update();
         this.disguiseWrapper.update();
@@ -963,20 +993,11 @@ public class DisguiseState extends MorphPluginObject
 
     //endregion Sound Handling
 
-    public DisguiseState createCopy(Player player, boolean allowWaypoint)
+    private final ConsumerActions<DisguiseState> onDisposeActions = new ConsumerActions<>();
+
+    public void onDispose(Consumer<DisguiseState> consumer)
     {
-        if (disposed())
-            throw new RuntimeException("Can't create a copy of a disposed DisguiseState");
-
-        var wrapper = this.disguiseWrapper.clone();
-
-        var newInstance = new DisguiseState(player, this.disguiseIdentifier, this.skillLookupIdentifier(),
-                wrapper, provider, this.playerOptions, playerMeta, allowWaypoint);
-
-        newInstance.playerDisplay = this.playerDisplay;
-        newInstance.serverDisplay = this.serverDisplay;
-
-        return newInstance;
+        onDisposeActions.hook(consumer);
     }
 
     private final AtomicBoolean disposed = new AtomicBoolean(false);
@@ -994,6 +1015,7 @@ public class DisguiseState extends MorphPluginObject
             return;
 
         stateFuture.complete(this);
+        onDisposeActions.invoke(this);
 
         disposed.set(true);
 

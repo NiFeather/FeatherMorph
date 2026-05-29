@@ -38,14 +38,14 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
     }
 
     private final DisguiseState state;
-    private final List<String> availableSequences;
+    private final List<String> availableActions;
 
-    public AnimSelectScreenWrapper(DisguiseState state, List<String> availableSequences)
+    public AnimSelectScreenWrapper(DisguiseState state, List<String> availableActions)
     {
         super(state.getPlayer());
 
         this.state = state;
-        this.availableSequences = availableSequences;
+        this.availableActions = availableActions;
 
         this.guiInstance = preparePage();
         this.initElements(this.guiInstance);
@@ -149,13 +149,20 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
 
         groupElement.setFiller(filler);
 
-        for (String sequenceId : availableSequences)
+        var animationSet = state.getProvider()
+                .getAnimationProvider()
+                .getAnimationSetFor(state.getDisguiseIdentifier());
+
+        for (String actionName : availableActions)
         {
+            var action = animationSet.getAction(actionName);
+            if (action == null) continue;
+
             var icon = defaultIcon.clone();
 
             icon.editMeta(meta ->
             {
-                var name = EmoteStrings.get(sequenceId)
+                var name = EmoteStrings.get(actionName)
                         .createComponent()
                         .style(Style.style().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
 
@@ -163,16 +170,10 @@ public class AnimSelectScreenWrapper extends ScreenWrapper
                 meta.customName(name);
             });
 
-            var element = new StaticGuiElement('_', icon, 1 + availableSequences.indexOf(sequenceId), click ->
+            var element = new StaticGuiElement('_', icon, 1 + availableActions.indexOf(actionName), click ->
             {
-                var animationSet = state.getProvider()
-                        .getAnimationProvider()
-                        .getAnimationSetFor(state.getDisguiseIdentifier());
-
-                var sequencePair = animationSet.sequenceOf(sequenceId);
-
                 getBindingPlayer().playSound(clickSound);
-                state.tryScheduleSequence(sequenceId, sequencePair.left(), sequencePair.right());
+                state.tryScheduleAction(actionName, action);
                 guiInstance.close();
 
                 return true;

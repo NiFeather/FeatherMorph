@@ -89,6 +89,12 @@ public abstract class DisguiseBackend<TInstance, TWrapper extends DisguiseWrappe
     public abstract void disguise(Player player, DisguiseWrapper<?> wrapper) throws ExecutionErrorException;
 
     /**
+     * Respawn the disguise belonging to the given wrapper
+     * @param wrapper The wrapper to respawn
+     */
+    public abstract void respawnDisguise(DisguiseWrapper<?> wrapper);
+
+    /**
      * Undisguise a player
      * @param player The player to undisguise
      * @return Whether the operation was successful

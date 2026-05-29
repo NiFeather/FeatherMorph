@@ -64,7 +64,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
 
         for (var eT : EntityType.values())
         {
-            if (eT == EntityType.UNKNOWN || !eT.isAlive()) continue;
+            if (eT == EntityType.UNKNOWN) continue;
 
             list.add(eT.getKey().getKey());
         }
@@ -123,7 +123,7 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             }
         }
 
-        if (entityType == null || entityType == EntityType.PLAYER || !entityType.isAlive())
+        if (entityType == null || entityType == EntityType.PLAYER)
         {
             MessageUtils.send(player, MorphStrings.disguiseBannedOrNotSupportedString());
             logger.error("Can't disguise player %s because someone is trying to use an illegal mob type: %s(%s)".formatted(player.getName(), disguiseMeta.getIdentifier(), entityType));
@@ -405,5 +405,13 @@ public class VanillaDisguiseProvider extends DefaultDisguiseProvider
             return Component.text("???");
         else
             return masterVanillaMessageStore.getComponent(type.translationKey(), null, locale);
+    }
+
+    @Override
+    public Component getClientLocalizableName(String disguiseIdentifier)
+    {
+        var type = EntityTypeUtils.fromString(disguiseIdentifier, true);
+
+        return type == null ? Component.text("???") : Component.translatable(type.translationKey());
     }
 }

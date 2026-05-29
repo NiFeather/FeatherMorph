@@ -117,6 +117,16 @@ public class DisguiseProperties
 
         registerCollection(EntityType.NAUTILUS, new NautilusPropertyCollection());
         registerCollection(EntityType.ZOMBIE_NAUTILUS, new ZombieNautilusPropertyCollection());
+
+        registerCollection(EntityType.ITEM_DISPLAY, new ItemDisplayPropertyCollection());
+        registerCollection(EntityType.TEXT_DISPLAY, new TextDisplayPropertyCollection());
+
+        registerCollection(EntityType.ALLAY, new AllayPropertyCollection());
+        registerCollection(EntityType.ARMADILLO, new ArmadilloPropertyCollection());
+        registerCollection(EntityType.CREAKING, new  CreakingPropertyCollection());
+        registerCollection(EntityType.PIGLIN, new PiglinPropertyCollection());
+        registerCollection(EntityType.PUFFERFISH, new PufferfishPropertyCollection());
+        registerCollection(EntityType.SNIFFER, new SnifferPropertyCollection());
     }
 
     public Map<EntityType, PropertyCollection<?>> getAllCollections()

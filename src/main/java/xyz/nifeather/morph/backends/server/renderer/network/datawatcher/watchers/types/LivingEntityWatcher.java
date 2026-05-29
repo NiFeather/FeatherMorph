@@ -6,21 +6,25 @@ import com.github.retrooper.packetevents.protocol.particle.data.ParticleColorDat
 import com.github.retrooper.packetevents.resources.ResourceLocation;
 import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateAttributes;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import org.bukkit.Color;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
@@ -28,13 +32,17 @@ import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.BaseLivingEntityPropertyCollection;
-import xyz.nifeather.morph.utilities.NmsUtils;
+import xyz.nifeather.morph.network.server.frog.S2CEntityAnimateCommand;
+import xyz.nifeather.morph.utilities.AttributeUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class LivingEntityWatcher extends EntityWatcher
 {
@@ -62,43 +70,115 @@ public class LivingEntityWatcher extends EntityWatcher
         handPair.right(e.getHand());
     }
 
+    protected final Map<NamespacedKey, AttributeInstance> entityAttributes = new ConcurrentHashMap<>();
+    protected final Map<NamespacedKey, AttributeInstance> dirtyAttributes = new ConcurrentHashMap<>();
+
+    @Override
+    public boolean containsEntityAttribute(NamespacedKey id)
+    {
+        return entityAttributes.keySet().stream().anyMatch(a -> a.key().equals(id));
+    }
+
+    @Override
+    @Nullable
+    public AttributeInstance readEntityAttribute(NamespacedKey key)
+    {
+        return entityAttributes.getOrDefault(key, null);
+    }
+
+    @Override
+    public void writeEntityAttribute(NamespacedKey id, org.bukkit.attribute.AttributeInstance attribute)
+    {
+        entityAttributes.put(id, attribute);
+        dirtyAttributes.put(id, attribute);
+
+        if (!isSilent())
+            sendPacketToAffectedPlayers(buildPartialAttributePacket());
+    }
+
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
         var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(BaseLivingEntityPropertyCollection.class);
-        if (property.equals(properties.CUSTOM_NAME))
-        {
-            Component component = value instanceof Component component1 ? component1 : Component.empty();
-            this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME, component.equals(Component.empty()) ? Optional.empty() : Optional.of(component));
-        }
-        else if (property.equals(properties.CUSTOM_NAME_VISIBLE))
-        {
-            Boolean bool = value instanceof Boolean b ? b : Boolean.parseBoolean(value.toString());
-            this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME_VISIBLE, bool);
-        }
-        else if (property.equals(properties.STUCKED_ARROWS))
-        {
-            int count = (Integer) value;
-            this.writePersistent(ValueIndex.BASE_LIVING.STUCKED_ARROWS, count);
-        }
-        else if (property.equals(properties.EQUIPMENT))
-        {
-            var upcoming = (DisguiseEquipment) value;
-            var existing = this.readEntry(CustomEntries.EQUIPMENT);
 
-            var newInstance = DisguiseEquipment.prefilled()
-                    .mergeIfNotNull(existing)
-                    .merge(upcoming)
-                    .build();
-
-            this.writeEntry(CustomEntries.EQUIPMENT, newInstance);
-        }
-        else if (property.equals(properties.DISPLAY_DISGUISE_EQUIPMENT))
+        switch (property.id())
         {
-            this.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, Boolean.TRUE.equals(value));
+            case PropertyNames.ENTITY_CUSTOM_NAME ->
+            {
+                Component component = value instanceof Component component1 ? component1 : Component.empty();
+                this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME, component.equals(Component.empty()) ? Optional.empty() : Optional.of(component));
+            }
+
+            case PropertyNames.ENTITY_CUSTOM_NAME_VISIBLE ->
+            {
+                Boolean bool = value instanceof Boolean b ? b : Boolean.parseBoolean(value.toString());
+                this.writePersistent(ValueIndex.BASE_LIVING.CUSTOM_NAME_VISIBLE, bool);
+            }
+
+            case PropertyNames.ENTITY_ARROW_COUNT ->
+            {
+                int count = (Integer) value;
+                this.writePersistent(ValueIndex.BASE_LIVING.STUCKED_ARROWS, count);
+            }
+
+            case PropertyNames.ENTITY_EQUIPMENT ->
+            {
+                var upcoming = (DisguiseEquipment) value;
+                var existing = this.readEntry(CustomEntries.EQUIPMENT);
+
+                var newInstance = DisguiseEquipment.prefilled()
+                        .mergeIfNotNull(existing)
+                        .merge(upcoming)
+                        .build();
+
+                this.writeEntry(CustomEntries.EQUIPMENT, newInstance);
+            }
+
+            case PropertyNames.ENTITY_DISPLAY_DISGUISE_EQUIPMENT ->
+            {
+                this.writeEntry(CustomEntries.DISPLAY_FAKE_EQUIPMENT, Boolean.TRUE.equals(value));
+            }
+
+            case PropertyNames.LIVING_ENTITY_STATIC_HEALTH ->
+            {
+                this.writePersistent(ValueIndex.BASE_LIVING.HEALTH, ((Number) value).floatValue());
+            }
+
+            case PropertyNames.LIVING_ENTITY_BED_POS ->
+            {
+                var jomlVector = (org.joml.Vector3i) value;
+
+                var peVec3i = new Vector3i(jomlVector.x(), jomlVector.y(), jomlVector.z());
+                this.writePersistent(ValueIndex.BASE_LIVING.BED_POS, Optional.of(peVec3i));
+            }
+
+            case PropertyNames.LIVING_ENTITY_INVISIBLE ->
+            {
+                var invisible = (Boolean) value;
+                int flag = this.read(ValueIndex.BASE_ENTITY.GENERAL);
+
+                if (invisible)
+                    flag |= 0x20;
+                else if ((flag & 0x20) == 0x20)
+                    flag ^= 0x20;
+
+                this.writePersistent(ValueIndex.BASE_ENTITY.GENERAL, (byte) flag);
+            }
         }
 
         super.onPropertyWrite(property, value);
+    }
+
+    @Override
+    protected <X> void onPropertyDiscard(SingleProperty<X> property)
+    {
+        super.onPropertyDiscard(property);
+
+        if (property.id().equals(PropertyNames.LIVING_ENTITY_BED_POS))
+        {
+            this.writePersistent(ValueIndex.BASE_LIVING.BED_POS, Optional.empty());
+            this.remove(ValueIndex.BASE_LIVING.BED_POS);
+        }
     }
 
     @Override
@@ -113,33 +193,44 @@ public class LivingEntityWatcher extends EntityWatcher
         }
     }
 
-    protected WrapperPlayServerUpdateAttributes buildAttributePacket()
+    protected WrapperPlayServerUpdateAttributes buildFullAttributePacket()
     {
+        dirtyAttributes.clear();
+
+        var map = new ConcurrentHashMap<NamespacedKey, AttributeInstance>();
         var player = getBindingPlayer();
+
+        var syncableAttributes = AttributeUtils.syncableAttributesFor(getEntityType());
+        for (Attribute syncableAttribute : syncableAttributes)
+        {
+            var instance = this.entityAttributes.getOrDefault(syncableAttribute.getKey(), null);
+            if (instance == null) instance = player.getAttribute(syncableAttribute);
+            if (instance == null) continue;
+
+            map.put(syncableAttribute.getKey(), instance);
+        }
+
+        return buildAttributePacket(map);
+    }
+
+    protected WrapperPlayServerUpdateAttributes buildPartialAttributePacket()
+    {
+        var map = new ConcurrentHashMap<>(dirtyAttributes);
+        dirtyAttributes.clear();
+
+        return buildAttributePacket(map);
+    }
+
+    protected WrapperPlayServerUpdateAttributes buildAttributePacket(Map<NamespacedKey, AttributeInstance> attributes)
+    {
         List<WrapperPlayServerUpdateAttributes.Property> attributeProperties = new ObjectArrayList<>();
 
-        var nmsPlayer = NmsRecord.ofPlayer(player);
-
-        List<AttributeInstance> attributes = getEntityType() == EntityType.PLAYER
-                ? new ObjectArrayList<>(nmsPlayer.getAttributes().getSyncableAttributes())
-                : NmsUtils.getValidAttributes(getEntityType(), nmsPlayer.getAttributes());
-
-        attributes.forEach(instance ->
+        attributes.forEach((id, instance) ->
         {
-            // Still NMS :(
-            var nmsAttribute = BuiltInRegistries.ATTRIBUTE.getKey(instance.getAttribute().value());
-            if (nmsAttribute == null)
+            var packetAttribute = Attributes.getByName(id.asString());
+            if (packetAttribute == null) // Yes this is nullable.
             {
-                logger.warn("Unknown attribute from bukkit to NMS: " + instance.getAttribute().value());
-                return;
-            }
-
-            String id = nmsAttribute.toString();
-
-            var packetAttribute = Attributes.getByName(id);
-            if (packetAttribute == null)
-            {
-                logger.warn("Unknown attribute for packet: " + id);
+                logger.warn("Unknown attribute for packet: " + id.asString());
                 return;
             }
 
@@ -147,10 +238,10 @@ public class LivingEntityWatcher extends EntityWatcher
             for (AttributeModifier modifier : instance.getModifiers())
             {
                 var packetModifier = new WrapperPlayServerUpdateAttributes.PropertyModifier(
-                        new ResourceLocation(modifier.id().toString()),
+                        new ResourceLocation(modifier.getKey().asString()),
                         UUID.randomUUID(),
-                        modifier.amount(),
-                        fromNMSAttributeOperation(modifier.operation())
+                        modifier.getAmount(),
+                        fromBukkitOperation(modifier.getOperation())
                 );
 
                 modifiers.add(packetModifier);
@@ -160,16 +251,16 @@ public class LivingEntityWatcher extends EntityWatcher
             attributeProperties.add(property);
         });
 
-        return new WrapperPlayServerUpdateAttributes(player.getEntityId(), attributeProperties);
+        return new WrapperPlayServerUpdateAttributes(this.readEntryOrThrow(CustomEntries.SPAWN_ID), attributeProperties);
     }
 
-    protected WrapperPlayServerUpdateAttributes.PropertyModifier.Operation fromNMSAttributeOperation(AttributeModifier.Operation nmsOperation)
+    protected WrapperPlayServerUpdateAttributes.PropertyModifier.Operation fromBukkitOperation(AttributeModifier.Operation bukkitOperation)
     {
-        return switch (nmsOperation)
+        return switch (bukkitOperation)
         {
-            case ADD_VALUE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.ADDITION;
-            case ADD_MULTIPLIED_BASE -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_BASE;
-            case ADD_MULTIPLIED_TOTAL -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_TOTAL;
+            case ADD_NUMBER -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.ADDITION;
+            case ADD_SCALAR -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_BASE;
+            case MULTIPLY_SCALAR_1 -> WrapperPlayServerUpdateAttributes.PropertyModifier.Operation.MULTIPLY_TOTAL;
         };
     }
 
@@ -180,7 +271,8 @@ public class LivingEntityWatcher extends EntityWatcher
         var entityPackets = super.buildSpawnPackets();
 
         packets.addAll(entityPackets);
-        packets.add(buildAttributePacket());
+        packets.add(buildFullAttributePacket());
+        packets.add(getEquipmentPacket());
 
         return packets;
     }
@@ -249,5 +341,77 @@ public class LivingEntityWatcher extends EntityWatcher
         }
 
         writeTemp(values.BED_POS, bedPos);
+    }
+
+    private final List<WrapperPlayServerEntityAnimation.EntityAnimationType> skipAnimates = ObjectLists.synchronize(new ObjectArrayList<>());
+
+    @Override
+    public void playEntityAnimation(String animateName)
+    {
+        if (isSilent())
+            return;
+
+        WrapperPlayServerEntityAnimation.EntityAnimationType animationType = switch (animateName)
+        {
+            case S2CEntityAnimateCommand.ANIM_SWING_MAINHAND -> WrapperPlayServerEntityAnimation.EntityAnimationType.SWING_MAIN_ARM;
+            case S2CEntityAnimateCommand.ANIM_SWING_OFFHAND -> WrapperPlayServerEntityAnimation.EntityAnimationType.SWING_OFF_HAND;
+
+            default -> null;
+        };
+
+        if (animationType == null)
+            return;
+
+        var packet = new WrapperPlayServerEntityAnimation(this.readEntryOrThrow(CustomEntries.SPAWN_ID), animationType);
+
+        skipAnimates.add(animationType);
+        sendPacketToAffectedPlayers(packet);
+
+        super.playEntityAnimation(animateName);
+    }
+
+    @Override
+    public boolean skipEntityAnimate(WrapperPlayServerEntityAnimation.EntityAnimationType type)
+    {
+        return skipAnimates.remove(type);
+    }
+
+    /**
+     * @param animationType PacketEvents' EntityAnimationType
+     * @return The corresponding name at FeatherMorph's side, {@code null} if not supported.
+     */
+    @Nullable
+    protected String getMorphAnimateName(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
+    {
+        return switch (animationType)
+        {
+            case SWING_MAIN_ARM -> S2CEntityAnimateCommand.ANIM_SWING_MAINHAND;
+            case SWING_OFF_HAND -> S2CEntityAnimateCommand.ANIM_SWING_OFFHAND;
+            default -> null;
+        };
+    }
+
+    @Override
+    public boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
+    {
+        @Nullable String asMorphAnimateName = getMorphAnimateName(animationType);
+
+        return animationType != WrapperPlayServerEntityAnimation.EntityAnimationType.WAKE_UP
+                && (asMorphAnimateName == null || !blockedEntityAnimates.contains(asMorphAnimateName));
+    }
+
+    protected final List<String> blockedEntityAnimates = ObjectLists.synchronize(new ObjectArrayList<>());
+
+    @Override
+    public void updateEntityAnimateMaskStatus(String animateName, boolean isAllowed)
+    {
+        var alreadyBlocking = blockedEntityAnimates.contains(animateName);
+
+        if (isAllowed)
+            blockedEntityAnimates.remove(animateName);
+        else if (!alreadyBlocking)
+            blockedEntityAnimates.add(animateName);
+
+        super.updateEntityAnimateMaskStatus(animateName, isAllowed);
     }
 }

@@ -3,8 +3,10 @@ package xyz.nifeather.morph.backends.server.renderer.network.listeners;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateAttributes;
+import org.bukkit.NamespacedKey;
 import xiamomc.pluginbase.Annotations.Resolved;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.RenderRegistry;
+import xyz.nifeather.morph.utilities.AttributeUtils;
 import xyz.nifeather.morph.utilities.NmsUtils;
 
 /**
@@ -37,19 +39,30 @@ public class AttributePacketListener extends ProtocolListener
         if (watcher == null)
             return;
 
-        var syncableAttributes = NmsUtils.getSyncableAttributeListFor(watcher.getEntityType());
+        var syncableAttributes = AttributeUtils.syncableAttributesFor(watcher.getEntityType());
         var properties = wrapper.getProperties();
+        int size = properties.size();
 
         properties.removeIf(property ->
         {
-            var id = property.getAttribute().getName().toString();
+            var keyed = NamespacedKey.fromString(property.getAttribute().getName().toString());
+            if (keyed == null)
+                return true;
 
-            return syncableAttributes.stream().noneMatch(syncable -> syncable.equals(id));
+            if (syncableAttributes.stream().noneMatch(a -> a.key().equals(keyed)))
+                return true;
+
+            var instance = watcher.readEntityAttribute(keyed);
+            if (instance == null)
+                return false;
+
+            return property.getValue() != instance.getValue();
         });
+
+        if (size != properties.size())
+            event.markForReEncode(true);
 
         if (properties.isEmpty())
             event.setCancelled(true);
-
-        super.onPacketSend(event);
     }
 }

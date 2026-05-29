@@ -1,9 +1,12 @@
 package xyz.nifeather.morph.misc.waypoint;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.waypoints.WaypointManager;
 import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
@@ -17,7 +20,10 @@ import xyz.nifeather.morph.misc.waypoint.connection.MorphAzimuthWaypointConnecti
 import xyz.nifeather.morph.misc.waypoint.connection.MorphBlockConnection;
 import xyz.nifeather.morph.misc.waypoint.connection.MorphChunkConnection;
 import xyz.nifeather.morph.providers.disguise.DefaultDisguiseProvider;
+import xyz.nifeather.morph.utilities.ReflectionUtils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -37,18 +43,52 @@ public class DisguiseWaypointTransmitter implements IDisguiseWaypointTransmitter
     @Nullable
     private ServerLevel lastWorld = null;
 
+    private static final Cache<ServerLevel, WaypointManager<WaypointTransmitter>> waypointManagerCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(Duration.ofSeconds(60))
+            .build();
+
+    @Nullable
+    private WaypointManager<WaypointTransmitter> getWaypointManager(ServerLevel world)
+    {
+        var existing = waypointManagerCache.getIfPresent(world);
+        if (existing != null)
+            return existing;
+
+        try
+        {
+            var method = world.getClass().getMethod("getWaypointManager");
+            var manager = (WaypointManager<WaypointTransmitter>) method.invoke(world);
+
+            waypointManagerCache.put(world, manager);
+            return manager;
+        }
+        catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e)
+        {
+            return null;
+        }
+    }
+
     @Override
     public void tick()
     {
         var allowConnection = allowWaypointConnection();
 
         var currentWorld = NmsRecord.ofPlayer(getPlayer()).level();
-        var currentWaypointManager = currentWorld.getWaypointManager();
 
         if (!currentWorld.equals(lastWorld))
         {
             if (lastWorld != null)
-                lastWorld.getWaypointManager().untrackWaypoint(this);
+            {
+                var lastWaypoints = getWaypointManager(lastWorld);
+
+                if (lastWaypoints != null)
+                {
+                    var lastWaypointManager = getWaypointManager(lastWorld);
+
+                    if (lastWaypointManager != null)
+                        lastWaypointManager.untrackWaypoint(this);
+                }
+            }
 
             transmitting = false;
         }
@@ -57,10 +97,14 @@ public class DisguiseWaypointTransmitter implements IDisguiseWaypointTransmitter
 
         if (transmitting != allowConnection)
         {
+            WaypointManager<WaypointTransmitter> currentWaypointManager = getWaypointManager(currentWorld);
+            if (currentWaypointManager == null)
+                return;
+
             if (allowConnection)
             {
-                if (!currentWaypointManager.transmitters().contains(this))
-                    currentWaypointManager.trackWaypoint(this);
+                currentWaypointManager.untrackWaypoint(this);
+                currentWaypointManager.trackWaypoint(this);
 
                 transmitting = true;
             }

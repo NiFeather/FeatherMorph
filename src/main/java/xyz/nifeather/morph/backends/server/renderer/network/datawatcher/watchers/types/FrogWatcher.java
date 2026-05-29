@@ -14,6 +14,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.FrogPropertyCollection;
 
@@ -45,35 +46,12 @@ public class FrogWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(FrogPropertyCollection.class);
+        super.onPropertyWrite(property, value);
 
-        if (property.equals(properties.VARIANT))
+        if (property.id().equals(PropertyNames.FROG_VARIANT))
         {
             var variant = (Frog.Variant) value;
             writePersistent(ValueIndex.FROG.FROG_VARIANT, getFrogVariant(variant.getKey()));
-        }
-    }
-
-    @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
-    {
-        super.onEntryWrite(entry, oldVal, newVal);
-
-        if (entry.equals(CustomEntries.ANIMATION))
-        {
-            var animId = newVal.toString();
-            var player = getBindingPlayer();
-            var world = player.getWorld();
-
-            switch (animId)
-            {
-                case AnimationNames.EAT ->
-                {
-                    this.writePersistent(ValueIndex.FROG.POSE, EntityPose.USING_TONGUE);
-                    world.playSound(player.getLocation(), Sound.ENTITY_FROG_EAT, 1, 1);
-                }
-                case AnimationNames.RESET -> this.remove(ValueIndex.FROG.POSE);
-            }
         }
     }
 

@@ -9,6 +9,7 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEnt
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
 import xyz.nifeather.morph.misc.disguiseProperty.DisguiseProperties;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
 import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.misc.disguiseProperty.values.PandaPropertyCollection;
 
@@ -42,39 +43,30 @@ public class PandaWatcher extends LivingEntityWatcher
     @Override
     protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        var properties = DisguiseProperties.INSTANCE.getCollectionOrThrow(PandaPropertyCollection.class);
-
-        if (property.equals(properties.MAIN_GENE))
+        switch (property.id())
         {
-            var val = (Panda.Gene) value;
-            writePersistent(ValueIndex.PANDA.MAIN_GENE, (byte)val.ordinal());
-        }
+            case PropertyNames.PANDA_MAIN_GENE ->
+            {
+                var val = (Panda.Gene) value;
+                writePersistent(ValueIndex.PANDA.MAIN_GENE, (byte)val.ordinal());
+            }
 
-        if (property.equals(properties.HIDDEN_GENE))
-        {
-            var val = (Panda.Gene) value;
-            writePersistent(ValueIndex.PANDA.HIDDEN_GENE, (byte)val.ordinal());
+            case PropertyNames.PANDA_HIDDEN_GENE ->
+            {
+                var val = (Panda.Gene) value;
+                writePersistent(ValueIndex.PANDA.HIDDEN_GENE, (byte)val.ordinal());
+            }
+
+            case PropertyNames.PANDA_SITTING ->
+            {
+                var sitting = (Boolean) value;
+                var flag = sitting ? 0x08 : 0x00;
+
+                this.writePersistent(ValueIndex.PANDA.PANDA_FLAGS, (byte) flag);
+            }
         }
 
         super.onPropertyWrite(property, value);
-    }
-
-    @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
-    {
-        super.onEntryWrite(entry, oldVal, newVal);
-
-        if (entry.equals(CustomEntries.ANIMATION))
-        {
-            var animId = newVal.toString();
-
-            switch (animId)
-            {
-                case AnimationNames.EAT -> this.writePersistent(ValueIndex.PANDA.EAT_TIMER, 100);
-                case AnimationNames.SIT -> this.writePersistent(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x08);
-                case AnimationNames.STANDUP, AnimationNames.RESET -> this.writePersistent(ValueIndex.PANDA.PANDA_FLAGS, (byte)0x00);
-            }
-        }
     }
 
     @Override

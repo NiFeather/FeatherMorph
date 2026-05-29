@@ -58,7 +58,8 @@ public class MetaPacketListener extends ProtocolListener
 
         try
         {
-            watcher.handleEntityMetadataPacket(wrapper);
+            if (watcher.handleEntityMetadataPacket(wrapper))
+                packetEvent.markForReEncode(true);
         }
         catch (Exception e)
         {

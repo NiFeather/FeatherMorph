@@ -3,12 +3,15 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -116,6 +119,18 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Disguise Property
 
+    public final <X> void discardProperty(SingleProperty<X> property)
+    {
+        if (property.restoreDefaultsBeforeDiscard())
+            writeProperty(property, property.defaultVal());
+
+        onPropertyDiscard(property);
+    }
+
+    protected <X> void onPropertyDiscard(SingleProperty<X> property)
+    {
+    }
+
     /**
      * Currently disguise properties are handled by the wrapper.
      * So the watcher only supports writing values so that the watcher could sync them with the wrapper.
@@ -200,7 +215,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public void resetRegistries()
     {
-        Map<Integer, Object> registryCopy = new Object2ObjectOpenHashMap<>(registry);
+        Map<Integer, Object> registryCopy = new Object2ObjectOpenHashMap<>(writtenValues);
 
         registryCopy.forEach((id, val) ->
         {
@@ -208,7 +223,7 @@ public abstract class SingleWatcher extends MorphPluginObject
             if (sv != null)
                 this.writePersistent((SingleValue<Object>) sv, sv.defaultValue());
 
-            this.registry.remove(id);
+            this.writtenValues.remove(id);
         });
 
         Map<String, Object> crCopy = new Object2ObjectOpenHashMap<>(customRegistry);
@@ -217,7 +232,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     //region Value Registry
 
-    protected final Map<Integer, Object> registry = new ConcurrentHashMap<>();
+    protected final Map<Integer, Object> writtenValues = new ConcurrentHashMap<>();
     private final Map<Integer, SingleValue<?>> knownValues = new ConcurrentHashMap<>();
 
     public Map<Integer, SingleValue<?>> getKnownValues()
@@ -295,7 +310,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     public void remove(SingleValue<?> singleValue)
     {
         //commonRegistry.remove(singleValue.index());
-        registry.remove(singleValue.index());
+        writtenValues.remove(singleValue.index());
     }
 
     /**
@@ -308,7 +323,7 @@ public abstract class SingleWatcher extends MorphPluginObject
      */
     public <X> void writeTemp(SingleValue<X> singleValue, @NotNull X value)
     {
-        if (this.registry.containsKey(singleValue.index())) return;
+        if (this.writtenValues.containsKey(singleValue.index())) return;
 
         this.write(singleValue, value, false);
     }
@@ -355,11 +370,11 @@ public abstract class SingleWatcher extends MorphPluginObject
                 logger.warn(message + "You may want to use 'tryCast(...)' or 'getKnownValues()' to get the correct SV.");
         }
 
-        var prevOption = registry.getOrDefault(singleValue.index(), null);
+        var prevOption = writtenValues.getOrDefault(singleValue.index(), null);
         var prev = prevOption == null ? null : (X)prevOption;
 
         if (isPersistent)
-            registry.put(singleValue.index(), value);
+            writtenValues.put(singleValue.index(), value);
 
         if (doingInitialization)
             return;
@@ -406,7 +421,7 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public <X> X readOr(SingleValue<X> singleValue, X defaultVal)
     {
-        var option = this.registry.getOrDefault(singleValue.index(), null);
+        var option = this.writtenValues.getOrDefault(singleValue.index(), null);
         if (option == null) return defaultVal;
         else return (X) option;
     }
@@ -418,16 +433,16 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     public boolean isValuePresent(int index)
     {
-        return this.registry.containsKey(index);
+        return this.writtenValues.containsKey(index);
     }
 
     /**
      * Gets the override values for this watcher
      * @apiNote This doesn't include values in the common registry!
      */
-    public Map<Integer, Object> getRegistry()
+    public Map<Integer, Object> getWrittenValues()
     {
-        return new Object2ObjectOpenHashMap<>(this.registry);
+        return new Object2ObjectOpenHashMap<>(this.writtenValues);
     }
 
     /**
@@ -435,7 +450,7 @@ public abstract class SingleWatcher extends MorphPluginObject
      */
     public Map<Integer, Object> getOverlayedRegistry()
     {
-        var map = this.getRegistry();
+        var map = this.getWrittenValues();
         this.getDirty().forEach((sv, option) -> map.putIfAbsent(sv.index(), option));
 
         return map;
@@ -462,7 +477,7 @@ public abstract class SingleWatcher extends MorphPluginObject
     {
     }
 
-    public final void handleEntityMetadataPacket(WrapperPlayServerEntityMetadata packetWrapper)
+    public final boolean handleEntityMetadataPacket(WrapperPlayServerEntityMetadata packetWrapper)
             throws ExecutionErrorException
     {
         //获取原Meta包中的数据
@@ -472,7 +487,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         if (originalData.removeIf(wrapped -> wrapped.getValue().equals(PacketFactory.MARK_DONT_PROCESS)))
         {
             packetWrapper.setEntityMetadata(originalData);
-            return;
+            return false;
         }
 
         var overrideList = rebuildMetadata(originalData);
@@ -480,6 +495,7 @@ public abstract class SingleWatcher extends MorphPluginObject
         // Then we ask the implementation if there's anything to modify
         overrideList = this.handleEntityMetadata(ImmutableList.copyOf(originalData), overrideList);
         packetWrapper.setEntityMetadata(new ArrayList<>(overrideList));
+        return true;
     }
 
     private List<EntityData<?>> rebuildMetadata(List<EntityData<?>> originalData) throws ExecutionErrorException
@@ -603,6 +619,11 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected void sendPacketToAffectedPlayers(PacketWrapper<?> packet)
     {
+        sendPacketToAffectedPlayers(List.of(packet));
+    }
+
+    protected void sendPacketToAffectedPlayers(List<PacketWrapper<?>> packets)
+    {
         if (isSilent())
         {
             logger.warn("Not sending packets: Sending packets while we should be silent?!");
@@ -620,12 +641,19 @@ public abstract class SingleWatcher extends MorphPluginObject
         var players = getAffectedPlayers(getBindingPlayer());
 
         var protocol = PacketEvents.getAPI().getPlayerManager();
-        players.forEach(p -> protocol.sendPacket(p, packet));
+        for (PacketWrapper<?> packet : packets)
+            players.forEach(p -> protocol.sendPacket(p, packet));
     }
 
     public abstract List<PacketWrapper<?>> buildSpawnPackets() throws BuildFailedException;
 
     public abstract List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException;
+
+    public abstract boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType);
+
+    public void onDisguiseApply()
+    {
+    }
 
     private boolean disposed;
 
@@ -654,5 +682,32 @@ public abstract class SingleWatcher extends MorphPluginObject
 
     protected void onDispose()
     {
+    }
+
+    public void onEntityDestroy(Player packetReceiver)
+    {
+    }
+
+    public abstract boolean containsEntityAttribute(NamespacedKey id);
+
+    @Nullable
+    public abstract AttributeInstance readEntityAttribute(NamespacedKey key);
+
+    /**
+     * @implNote Do nothing if the entity does not support attributes.
+     * @param id
+     * @param attribute
+     */
+    public abstract void writeEntityAttribute(NamespacedKey id, AttributeInstance attribute);
+
+    public abstract void playEntityAnimation(String animateName);
+    public abstract void updateEntityAnimateMaskStatus(String animateName, boolean isAllowed);
+
+    /**
+     * Whether to tell {@link xyz.nifeather.morph.backends.server.renderer.network.listeners.AnimationPacketListener} to skip detecting the given entity animate.
+     */
+    public boolean skipEntityAnimate(WrapperPlayServerEntityAnimation.EntityAnimationType type)
+    {
+        return false;
     }
 }

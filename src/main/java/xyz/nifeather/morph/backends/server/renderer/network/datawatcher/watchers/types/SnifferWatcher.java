@@ -5,10 +5,13 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sniffer;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntries;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.CustomEntry;
 import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueIndex;
 import xyz.nifeather.morph.misc.AnimationNames;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 
 public class SnifferWatcher extends LivingEntityWatcher
 {
@@ -26,30 +29,26 @@ public class SnifferWatcher extends LivingEntityWatcher
     }
 
     @Override
-    protected <X> void onEntryWrite(CustomEntry<X> entry, X oldVal, X newVal)
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super.onEntryWrite(entry, oldVal, newVal);
+        super.onPropertyWrite(property, value);
 
-        if (entry.equals(CustomEntries.ANIMATION))
+        if (property.id().equals(PropertyNames.SNIFFER_STATE))
         {
-            var bindingPlayer = getBindingPlayer();
-            var world = bindingPlayer.getWorld();
-            var id = newVal.toString();
+            var state = (Sniffer.State) value;
 
-            switch (id)
+            SnifferState peState = switch (state)
             {
-                case AnimationNames.SNIFF ->
-                {
-                    this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, SnifferState.SNIFFING);
-                    world.playSound(bindingPlayer.getLocation(), Sound.ENTITY_SNIFFER_SNIFFING, SoundCategory.NEUTRAL, 1, 1);
-                }
-                case AnimationNames.RESET ->
-                {
-                    this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, SnifferState.IDLING);
-                    this.remove(ValueIndex.SNIFFER.SNIFFER_STATE);
-                }
-                default -> logger.warn("Unknown animation sequence id '%s'".formatted(id));
-            }
+                case IDLING -> SnifferState.IDLING;
+                case FEELING_HAPPY -> SnifferState.FEELING_HAPPY;
+                case SCENTING -> SnifferState.SCENTING;
+                case SNIFFING -> SnifferState.SNIFFING;
+                case SEARCHING -> SnifferState.SEARCHING;
+                case DIGGING -> SnifferState.DIGGING;
+                case RISING -> SnifferState.RISING;
+            };
+
+            this.writePersistent(ValueIndex.SNIFFER.SNIFFER_STATE, peState);
         }
     }
 }

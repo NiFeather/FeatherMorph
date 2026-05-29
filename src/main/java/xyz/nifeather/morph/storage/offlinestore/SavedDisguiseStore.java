@@ -2,6 +2,7 @@ package xyz.nifeather.morph.storage.offlinestore;
 
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.interfaces.IManageSavedDisguise;
 import xyz.nifeather.morph.misc.DisguiseState;
@@ -26,16 +27,16 @@ public class SavedDisguiseStore extends DirectoryJsonBasedStorage<SavedDisguise>
         return new SavedDisguise();
     }
 
-    /**
-     * 将一个玩家的DisguiseState推到存储里
-     * @param state DisguiseState
-     */
-    public boolean save(DisguiseState state)
+    @Override
+    public boolean save(@NotNull DisguiseState state)
     {
-        var uniqueId = state.getPlayer().getUniqueId();
-        String uuidString = uniqueId.toString();
+        return save(state, "anonymous:" + state.getPlayerUUID().toString());
+    }
 
-        var file = directoryStorage.getFile(uuidString + ".json", true);
+    @Override
+    public boolean save(@NotNull DisguiseState state, String name)
+    {
+        var file = this.getFile(name, true);
         if (file == null) return false;
 
         String json = gson.toJson(SavedDisguise.fromState(state));
@@ -57,29 +58,27 @@ public class SavedDisguiseStore extends DirectoryJsonBasedStorage<SavedDisguise>
     public List<String> listNames()
     {
         return Arrays.stream(directoryStorage.getFiles())
-                .map(f -> f.getName().replace(".json", ""))
+                .map(this::getKeyFromFile)
                 .toList();
     }
 
     /**
-     * 从存储里取出离线State并从池里移除此State
-     * @param uuid 玩家UUID
-     * @return 离线State
+     * Read saved disguise from the disk
+     * @param name Name of the target save
+     * @return An instance of {@link SavedDisguise}, null if not found
      */
     @Nullable
-    public SavedDisguise read(UUID uuid)
+    public SavedDisguise read(String name)
     {
-        var file = directoryStorage.getFile(uuid.toString() + ".json", false);
+        var file = this.getFile(name, false);
         if (file == null || !file.exists())
             return null;
 
         try
         {
             var content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-            var instance = gson.fromJson(content, SavedDisguise.class);
 
-            file.delete();
-            return instance;
+            return gson.fromJson(content, SavedDisguise.class);
         }
         catch (JsonSyntaxException e)
         {
@@ -91,5 +90,25 @@ public class SavedDisguiseStore extends DirectoryJsonBasedStorage<SavedDisguise>
             logger.error("SavedDisguiseStore: Failed to read SavedDisguise from disk", e);
             return null;
         }
+    }
+
+    @Nullable
+    public SavedDisguise read(UUID uuid)
+    {
+        return read("anonymous:" + uuid.toString());
+    }
+
+    public boolean drop(String name)
+    {
+        var file = this.getFile(name, false);
+        if (file == null || !file.exists())
+            return true;
+
+        return file.delete();
+    }
+
+    public boolean drop(UUID uuid)
+    {
+        return drop("anonymous:" + uuid.toString());
     }
 }

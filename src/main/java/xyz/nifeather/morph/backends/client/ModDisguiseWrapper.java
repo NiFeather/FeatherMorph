@@ -2,6 +2,8 @@ package xyz.nifeather.morph.backends.client;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -48,6 +50,12 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
     }
 
     @Override
+    public void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute)
+    {
+        // attribute feature not implemented in client renderer yet.
+    }
+
+    @Override
     public <X> void writeProperty(SingleProperty<X> property, X value)
     {
         this.instance.writeProperty(property, value);
@@ -60,6 +68,12 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
 
             return;
         }
+    }
+
+    @Override
+    public <X> void discardProperty(SingleProperty<X> property)
+    {
+        this.instance.discardProperty(property);
     }
 
     @Override
@@ -132,6 +146,16 @@ public class ModDisguiseWrapper extends EventWrapper<TrackingClientDisguise>
 
     @Override
     public void update()
+    {
+    }
+
+    @Override
+    public void playEntityAnimation(String animateName)
+    {
+    }
+
+    @Override
+    public void updateEntityAnimateMask(String animateName, boolean isAllowed)
     {
     }
 

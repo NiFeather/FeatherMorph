@@ -3,19 +3,20 @@ package xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watcher
 import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
+import com.github.retrooper.packetevents.wrapper.play.server.*;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Pose;
+import org.jetbrains.annotations.Nullable;
 import xyz.nifeather.morph.backends.server.renderer.network.PacketFactory;
 import xyz.nifeather.morph.backends.server.renderer.network.ProtocolEquipment;
 import xyz.nifeather.morph.backends.server.renderer.network.datawatcher.watchers.SingleWatcher;
@@ -25,18 +26,21 @@ import xyz.nifeather.morph.backends.server.renderer.network.registries.ValueInde
 import xyz.nifeather.morph.misc.BuildFailedException;
 import xyz.nifeather.morph.misc.DisguiseEquipment;
 import xyz.nifeather.morph.misc.NmsRecord;
+import xyz.nifeather.morph.misc.disguiseProperty.PropertyNames;
+import xyz.nifeather.morph.misc.disguiseProperty.SingleProperty;
 import xyz.nifeather.morph.utilities.EntityTypeUtils;
 import xyz.nifeather.morph.utilities.FoliaThreadUtils;
 import xyz.nifeather.morph.utilities.Uuids;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
 
 public class EntityWatcher extends SingleWatcher
 {
+    public EntityWatcher(Player bindingPlayer, EntityType entityType)
+    {
+        super(bindingPlayer, entityType);
+    }
+
     @Override
     protected void initRegistry()
     {
@@ -45,9 +49,99 @@ public class EntityWatcher extends SingleWatcher
         register(ValueIndex.BASE_ENTITY);
     }
 
-    public EntityWatcher(Player bindingPlayer, EntityType entityType)
+    @Nullable
+    protected volatile Float lockedYaw;
+
+    @Nullable
+    protected volatile Float lockedPitch;
+
+    @Override
+    protected <X> void onPropertyWrite(SingleProperty<X> property, X value)
     {
-        super(bindingPlayer, entityType);
+        super.onPropertyWrite(property, value);
+
+        switch (property.id())
+        {
+            case PropertyNames.ENTITY_STATIC_YAW ->
+            {
+                lockedYaw = (Float) value;
+
+                if (!isSilent())
+                    sendPacketToAffectedPlayers(createRotationPackets());
+            }
+
+            case PropertyNames.ENTITY_STATIC_PITCH ->
+            {
+                lockedPitch = (Float) value;
+
+                if (!isSilent())
+                    sendPacketToAffectedPlayers(createRotationPackets());
+            }
+
+            case PropertyNames.ENTITY_STATIC_POSE ->
+            {
+                var bukkitPose = (Pose) value;
+                this.writePersistent(ValueIndex.BASE_ENTITY.POSE, SpigotConversionUtil.fromBukkitPose(bukkitPose));
+            }
+        }
+    }
+
+    @Override
+    protected <X> void onPropertyDiscard(SingleProperty<X> property)
+    {
+        switch (property.id())
+        {
+            case PropertyNames.ENTITY_STATIC_YAW ->
+            {
+                lockedYaw = null;
+
+                if (!isSilent())
+                    sendPacketToAffectedPlayers(createRotationPackets());
+            }
+
+            case PropertyNames.ENTITY_STATIC_PITCH ->
+            {
+                lockedPitch = null;
+
+                if (!isSilent())
+                    sendPacketToAffectedPlayers(createRotationPackets());
+            }
+
+            case PropertyNames.ENTITY_STATIC_POSE ->
+            {
+                var pose = getBindingPlayer().getPose();
+
+                this.writeTemp(ValueIndex.BASE_ENTITY.POSE, SpigotConversionUtil.fromBukkitPose(pose));
+                this.remove(ValueIndex.BASE_ENTITY.POSE);
+            }
+        }
+
+        super.onPropertyDiscard(property);
+    }
+
+    protected List<PacketWrapper<?>> createRotationPackets()
+    {
+        var player = getBindingPlayer();
+
+        float yaw = this.readEntryOrDefault(CustomEntries.OVERLAYED_YAW, player.getYaw());
+        float pitch = this.readEntryOrDefault(CustomEntries.OVERLAYED_PITCH, player.getPitch());
+
+        return List.of(
+                new WrapperPlayServerEntityRotation(this.readEntryOrThrow(CustomEntries.SPAWN_ID), yaw, pitch, player.isOnGround()), // Let's just use what the client assumes
+                new WrapperPlayServerEntityHeadLook(this.readEntryOrThrow(CustomEntries.SPAWN_ID), yaw)
+        );
+    }
+
+    @Override
+    public @org.jspecify.annotations.Nullable <X> X readEntry(CustomEntry<X> entry)
+    {
+        if (Objects.equals(entry, CustomEntries.OVERLAYED_PITCH) && lockedPitch != null)
+            return (X) lockedPitch;
+
+        if (Objects.equals(entry, CustomEntries.OVERLAYED_YAW) && lockedYaw != null)
+            return (X) lockedYaw;
+
+        return super.readEntry(entry);
     }
 
     protected byte getPlayerBitMask(Player player)
@@ -95,10 +189,9 @@ public class EntityWatcher extends SingleWatcher
     public static final int PACKET_MARK = 10998;
 
     private List<PacketWrapper<?>> buildSpawnPacketsFor(Player player)
+            throws BuildFailedException
     {
         List<PacketWrapper<?>> packets = new ObjectArrayList<>();
-
-        var nmsPlayer = NmsRecord.ofPlayer(player);
 
         UUID spawnUUID = this.readEntryOrThrow(CustomEntries.SPAWN_UUID);
         if (spawnUUID.equals(Uuids.NIL_UUID))
@@ -119,12 +212,12 @@ public class EntityWatcher extends SingleWatcher
                 this.readEntryOrThrow(CustomEntries.SPAWN_ID), spawnUUID,
                 SpigotConversionUtil.fromBukkitEntityType(disguiseEntityType),
                 new Location(new Vector3d(player.getX(), player.getY(), player.getZ()), yaw, pitch),
-                nmsPlayer.getYHeadRot(), PACKET_MARK,
+                yaw, PACKET_MARK, // I'll just assume using yaw as the "Head Yaw" is okay for us
                 new Vector3d(playerMotion.getX(), playerMotion.getY(), playerMotion.getZ())
         );
 
+        packets.addAll(preSpawnPackets());
         packets.add(spawnPacket);
-        packets.add(getEquipmentPacket());
         packets.add(PacketFactory.buildFullMetaPacket(player, this));
 
         // 载具
@@ -153,6 +246,12 @@ public class EntityWatcher extends SingleWatcher
         return packets;
     }
 
+    protected Collection<? extends PacketWrapper<?>> preSpawnPackets()
+            throws BuildFailedException
+    {
+        return Collections.emptyList();
+    }
+
     @Override
     public List<PacketWrapper<?>> buildVirtualEntityDisposalPackets() throws BuildFailedException
     {
@@ -179,28 +278,11 @@ public class EntityWatcher extends SingleWatcher
             return result;
         }
 
-        try
-        {
-            return FoliaThreadUtils.runOnEntitySync(getBindingPlayer(), this::buildSpawnPacketsFor, FoliaThreadUtils.DEFAULT_WAIT_TIMEOUT);
-        }
-        catch (TimeoutException e)
-        {
-            //仅仅是服务器太慢导致的等待超时，不要立马取消玩家的变形会话
-            throw new BuildFailedException("Waiting too long for server thread of player %s to respond!".formatted(getBindingPlayer().getName()), e)
-                    .critical(false);
-        }
-        catch (InterruptedException e)
-        {
-            throw new BuildFailedException("Task has been interrupted, why?", e);
-        }
-        catch (CancellationException e)
-        {
-            throw new BuildFailedException("Task cancelled, why?", e);
-        }
-        catch (Throwable t)
-        {
-            throw new BuildFailedException("Unhandled exception while building packet for '%s'!", t);
-        }
+        var player = getBindingPlayer();
+        if (!FoliaThreadUtils.isTickThreadFor(player))
+            throw new BuildFailedException("Cannot build spawn packets while not on player's tick thread.");
+
+        return this.buildSpawnPacketsFor(player);
     }
 
     @Override
@@ -245,5 +327,41 @@ public class EntityWatcher extends SingleWatcher
         customName.ifPresent(c -> nbt.putString("CustomName", JSONComponentSerializer.json().serialize(c)));
 
         nbt.putBoolean("CustomNameVisible", read(ValueIndex.BASE_ENTITY.CUSTOM_NAME_VISIBLE));
+    }
+
+    @Override
+    public boolean haveAnimation(WrapperPlayServerEntityAnimation.EntityAnimationType animationType)
+    {
+        return false;
+    }
+
+    @Override
+    public AttributeInstance readEntityAttribute(NamespacedKey key)
+    {
+        return null;
+    }
+
+    @Override
+    public boolean containsEntityAttribute(NamespacedKey id)
+    {
+        return false;
+    }
+
+    @Override
+    public void writeEntityAttribute(NamespacedKey id, AttributeInstance attribute)
+    {
+        // do nothing.
+    }
+
+    @Override
+    public void playEntityAnimation(String animateName)
+    {
+        // also do nothing.
+    }
+
+    @Override
+    public void updateEntityAnimateMaskStatus(String animateName, boolean isAllowed)
+    {
+        // do nothing.
     }
 }

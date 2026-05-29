@@ -1,6 +1,8 @@
 package xyz.nifeather.morph.backends;
 
 import net.minecraft.nbt.CompoundTag;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -153,6 +155,7 @@ public abstract class DisguiseWrapper<TInstance>
     {
     }
 
+    @Deprecated
     public void playAttackAnimation()
     {
     }
@@ -160,6 +163,14 @@ public abstract class DisguiseWrapper<TInstance>
     //endregion
 
     public abstract <X> void writeProperty(SingleProperty<X> property, X value);
+
+    /**
+     * Discard a property if it has been set.<br>
+     * Depending on {@link SingleProperty#restoreDefaultsBeforeDiscard()}, server-side presentation implementations may need reset the visual effect of the given property.
+     *
+     * @param property {@link SingleProperty} to discard
+     */
+    public abstract <X> void discardProperty(SingleProperty<X> property);
 
     /**
      * @return 与此Property对应的值，如果没有设定则返回默认值
@@ -173,10 +184,6 @@ public abstract class DisguiseWrapper<TInstance>
 
     public abstract Map<SingleProperty<?>, Object> getProperties();
 
-    public void playAnimation(String animationId)
-    {
-    }
-
     public void onPlayerJoin(Player newInstance)
     {
     }
@@ -184,4 +191,9 @@ public abstract class DisguiseWrapper<TInstance>
     public abstract <T> void subscribeEvent(Object source, WrapperEvent<T> wrapperEvent, Consumer<T> c);
 
     public abstract void unSubscribeEvent(Object source, WrapperEvent<?> wrapperEvent);
+
+    public abstract void onDisguiseAttributeChange(NamespacedKey id, AttributeInstance attribute);
+
+    public abstract void playEntityAnimation(String animateName);
+    public abstract void updateEntityAnimateMask(String animateName, boolean isAllowed);
 }

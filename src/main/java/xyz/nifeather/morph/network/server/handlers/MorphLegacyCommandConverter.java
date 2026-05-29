@@ -24,6 +24,9 @@ public class MorphLegacyCommandConverter extends S2CCommandConverter
                 case ProtocolEquipmentSlot.CHESTPLATE -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.CHESTPLATE;
                 case ProtocolEquipmentSlot.LEGGINGS -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.LEGGINGS;
                 case ProtocolEquipmentSlot.BOOTS -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.BOOTS;
+
+                // Uhhh legacy clients don't have BODY and SADDLE slot defined in protocol
+                default -> NetheriteS2CSetFakeEquipCommand.ProtocolEquipmentSlot.BOOTS;
             };
 
             return new LegacySetEquipCommand(cmd.getItemStack(), netheriteSlot);

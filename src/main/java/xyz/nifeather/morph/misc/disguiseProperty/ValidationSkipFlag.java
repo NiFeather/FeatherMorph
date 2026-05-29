@@ -1,6 +1,6 @@
 package xyz.nifeather.morph.misc.disguiseProperty;
 
-public enum ValidationFlag
+public enum ValidationSkipFlag
 {
     SKIP_PERMISSIONS
 }
